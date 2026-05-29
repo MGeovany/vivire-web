@@ -1,31 +1,24 @@
 # vivire
 
-Minimalist daily journal.
+Un diario personal, mínimo. Para anotar el día sin pelearte con la pantalla.
 
-Laravel + Livewire. Postgres on Supabase. Deploy on Vercel.
+## Por qué existe
 
-## Local
+La mayoría de apps de notas intentan hacer de todo. **vivire** no.
+Lo abrí con una idea simple: escribir un día, tal como fue, y guardarlo. Sin convertirlo en un sistema.
 
-```bash
-composer install
-pnpm install
-pnpm build
+La inspiración es el cuaderno que dejas a la mano: abrir, escribir, cerrar.
+Sin feeds. Sin widgets. Sin ruido.
 
-cp .env.example .env
-php artisan key:generate
-php artisan migrate
+## Detalles que importan
 
-composer dev
-```
+- Interfaz clara, tipografía cuidada
+- Corrector ortografico en espanol
+- Sonido opcional de teclado mecanico al teclear
+- Tus entradas son privadas
 
-App: `http://localhost:8081`
+## Nombre
 
-## Env
-
-Set your Supabase Postgres **Transaction pooler** (IPv4):
-
-- `DB_HOST=aws-1-us-west-2.pooler.supabase.com`
-- `DB_PORT=6543`
-- `DB_USERNAME=postgres.<project_ref>`
-- `DB_PASSWORD=...`
-- `DB_SSLMODE=require`
+*Vivire* viene de **vivir**.
+No es un planner ni un second brain.
+Es una forma de decir: esto paso hoy.
