@@ -441,90 +441,12 @@
     return replaceWordInBlock(block, hit.start, hit.end, fixed);
   }
 
-  // ── Typing sounds (synthesized — no audio files) ────────────────────────────
-  let audioCtx = null;
-  let soundOn  = localStorage.getItem('vivire_sound') !== 'off';   // default ON
-
-  // Cached white-noise buffer (reused by every keystroke).
-  let noiseBuf = null;
-  function whiteNoise() {
-    if (noiseBuf) return noiseBuf;
-    const len = Math.ceil(audioCtx.sampleRate * 0.2);
-    noiseBuf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
-    const d = noiseBuf.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-    return noiseBuf;
-  }
-
-  // One filtered noise burst (used to layer the typewriter clack).
-  function noiseBurst(t, freq, q, type, peak, dur) {
-    const src = audioCtx.createBufferSource();
-    src.buffer = whiteNoise();
-    const f = audioCtx.createBiquadFilter();
-    f.type = type;
-    f.frequency.value = freq;
-    if (q) f.Q.value = q;
-    const g = audioCtx.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(peak, t + 0.001);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    src.connect(f).connect(g).connect(audioCtx.destination);
-    src.start(t);
-    src.stop(t + dur + 0.02);
-  }
-
-  function tone(t, type, freq, peak, dur) {
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = type;
-    o.frequency.value = freq;
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(peak, t + 0.003);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g).connect(audioCtx.destination);
-    o.start(t);
-    o.stop(t + dur + 0.02);
-  }
-
-  // The mechanical clack of a typebar hitting the platen.
-  function typeClack(t) {
-    noiseBurst(t, 2600 + Math.random() * 500, 6, 'bandpass', 0.45, 0.028); // metallic snap
-    noiseBurst(t, 210, 1.2, 'bandpass', 0.30, 0.06);                       // wooden body thunk
-    tone(t, 'square', 1300 + Math.random() * 200, 0.10, 0.018);            // sharp pitched tick
-  }
-
-  // The carriage-return bell on Enter.
-  function bellDing(t) {
-    tone(t, 'sine', 1100, 0.17, 0.42);
-    tone(t, 'sine', 2200, 0.05, 0.42);
-  }
+  // ── Typing sounds (@rexa-developer/tiks — public/js/typing-sound.js) ───────
+  let soundOn = localStorage.getItem('vivire_sound') !== 'off';
 
   function playClick(e) {
-    if (!soundOn) return;
-    const k = e.key;
-    const printable = (k && k.length === 1) || k === 'Backspace' || k === 'Enter';
-    if (!printable) return;
-    try {
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const t = audioCtx.currentTime;
-      typeClack(t);
-      if (k === 'Enter') bellDing(t + 0.015);   // carriage-return bell
-    } catch (_) { /* audio unavailable — ignore */ }
+    window.vivireTypingSound?.play(e.key);
   }
-
-  // Unlock/resume the AudioContext on the very first user gesture (some browsers
-  // start it suspended until an explicit gesture).
-  function unlockAudio() {
-    try {
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-    } catch (_) {}
-    document.removeEventListener('pointerdown', unlockAudio);
-    document.removeEventListener('keydown', unlockAudio);
-  }
-  document.addEventListener('pointerdown', unlockAudio);
-  document.addEventListener('keydown', unlockAudio);
 
   // Lucide icons: volume-2 (on) / volume-x (off)
   const LUCIDE_VOLUME_2 = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></svg>';
@@ -544,8 +466,7 @@
     paint();
     btn.addEventListener('click', () => {
       soundOn = !soundOn;
-      localStorage.setItem('vivire_sound', soundOn ? 'on' : 'off');
-      if (soundOn && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      window.vivireTypingSound?.setEnabled(soundOn);
       paint();
     });
   }
