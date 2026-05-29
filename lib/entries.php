@@ -6,7 +6,24 @@ function getEntriesByDate(string $userId, string $dateISO): array {
         'user_id'    => 'eq.' . $userId,
         'entry_date' => 'eq.' . $dateISO,
     ]);
-    return is_array($result['body']) ? $result['body'] : [];
+
+    $body = $result['body'];
+    if (!is_array($body) || !array_is_list($body)) {
+        if (IS_DEV && is_array($body)) {
+            error_log('[vivire] entries query error: ' . json_encode($body));
+        }
+        return [];
+    }
+
+    return $body;
+}
+
+function entryBlocks(array $entry): array {
+    $blocks = $entry['blocks'] ?? [];
+    if (is_string($blocks)) {
+        $blocks = json_decode($blocks, true);
+    }
+    return is_array($blocks) ? $blocks : [];
 }
 
 function upsertEntry(string $userId, string $dateISO, string $section, array $blocks): bool {

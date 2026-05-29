@@ -9,7 +9,8 @@ $todayISO = $today->format('Y-m-d');
 $todayEntries = getEntriesByDate($userId, $todayISO);
 $todayBySection = [];
 foreach ($todayEntries as $e) {
-    $todayBySection[$e['section']] = $e['blocks'] ?? [];
+    if (!is_array($e) || !isset($e['section'])) continue;
+    $todayBySection[$e['section']] = entryBlocks($e);
 }
 
 // Compute year dates and fetch their entries
@@ -19,8 +20,9 @@ foreach ($yearDates as $i => $yearDate) {
     $sectionId = 'year' . ($i + 1);
     $rows = getEntriesByDate($userId, $yearDate->format('Y-m-d'));
     foreach ($rows as $e) {
+        if (!is_array($e) || !isset($e['section'])) continue;
         if ($e['section'] === $sectionId) {
-            $yearEntries[$sectionId] = $e['blocks'] ?? [];
+            $yearEntries[$sectionId] = entryBlocks($e);
         }
     }
 }

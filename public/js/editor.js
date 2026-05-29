@@ -13,24 +13,30 @@
 
   async function saveEditor(editor) {
     const blocks = collectBlocks(editor);
+    const payload = {
+      section:    editor.dataset.section,
+      entry_date: editor.dataset.date,
+      blocks,
+    };
+    console.log('[vivire] POST /api/save', payload);
     try {
       const res = await fetch('/api/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          section:    editor.dataset.section,
-          entry_date: editor.dataset.date,
-          blocks,
-        }),
+        body: JSON.stringify(payload),
       });
+      console.log('[vivire] save response', res.status);
       if (res.ok) {
         setIndicator('saved');
         setTimeout(() => setIndicator(''), 2500);
       } else {
+        const err = await readApiError(res, 'No se pudo guardar');
+        console.error('[vivire] save error', err);
         setIndicator('');
-        showToast(await readApiError(res, 'No se pudo guardar'));
+        showToast(err);
       }
-    } catch {
+    } catch (e) {
+      console.error('[vivire] save fetch error', e);
       setIndicator('');
       showToast('Sin conexión. Intentaremos guardar de nuevo.');
     }
@@ -119,18 +125,23 @@
     form.append('file', file);
     form.append('type', type);
 
+    console.log('[vivire] POST /api/upload', { type, name: file.name, size: file.size });
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: form });
       loader.remove();
+      console.log('[vivire] upload response', res.status);
       if (res.ok) {
         const { url, name, size } = await res.json();
         editor.appendChild(buildMediaNode(type, url, name, size));
         scheduleAutoSave(editor);
       } else {
-        showToast(await readApiError(res, 'No se pudo subir el archivo'));
+        const err = await readApiError(res, 'No se pudo subir el archivo');
+        console.error('[vivire] upload error', err);
+        showToast(err);
       }
-    } catch {
+    } catch (e) {
       loader.remove();
+      console.error('[vivire] upload fetch error', e);
       showToast('Sin conexión. No se pudo subir el archivo.');
     }
   }

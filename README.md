@@ -63,7 +63,20 @@ composer dev
 
 Opens at **http://localhost:8080**.
 
-The built-in PHP server serves static assets from `public/` and routes all requests through `public/index.php` (FastRoute).
+Set `APP_URL` in `.env` to match (default `http://localhost:8080`).
+
+### Supabase auth settings
+
+In Supabase → **Authentication → URL Configuration**:
+
+| Setting | Local value |
+|---------|-------------|
+| Site URL | `http://localhost:8080` |
+| Redirect URLs | `http://localhost:8080/auth/callback` |
+
+Email confirmation links redirect to `/auth/callback`, which reads the tokens from the URL hash and starts your session.
+
+**Optional — skip email confirmation:** Authentication → **Providers → Email** → turn off **Confirm email**. New users can log in immediately after signup (no confirmation email).
 
 ---
 

@@ -33,9 +33,8 @@ function supabaseRequest(
     }
     $raw    = curl_exec($ch);
     $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
 
-    return ['status' => $status, 'body' => json_decode($raw, true)];
+    return ['status' => $status, 'body' => json_decode($raw ?: '', true)];
 }
 
 /**
@@ -57,9 +56,34 @@ function supabaseAuthRequest(string $method, string $path, array $body = []): ?a
         CURLOPT_TIMEOUT    => 15,
     ]);
     $raw = curl_exec($ch);
-    curl_close($ch);
 
-    return json_decode($raw, true);
+    return json_decode($raw ?: '', true);
+}
+
+/**
+ * Validate an access token with Supabase and return the user object, or null.
+ */
+function supabaseGetUser(string $accessToken): ?array {
+    $url = rtrim(SUPABASE_URL, '/') . '/auth/v1/user';
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER     => [
+            'apikey: ' . SUPABASE_ANON_KEY,
+            'Authorization: Bearer ' . $accessToken,
+        ],
+        CURLOPT_TIMEOUT        => 15,
+    ]);
+    $raw    = curl_exec($ch);
+    $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    if ($status >= 400) {
+        return null;
+    }
+
+    $user = json_decode($raw ?: '', true);
+    return is_array($user) ? $user : null;
 }
 
 /**
@@ -82,7 +106,6 @@ function supabaseStorageUpload(string $path, string $fileData, string $mimeType)
     ]);
     $raw    = curl_exec($ch);
     $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
 
     if ($status >= 400) return null;
 

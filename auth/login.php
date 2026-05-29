@@ -1,10 +1,4 @@
 <?php
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/../lib/supabase.php';
-require_once __DIR__ . '/../templates/layout.php';
-
-// Already authenticated
 if (getAuthUser()) { header('Location: /'); exit; }
 
 // ── POST: authenticate, then ALWAYS redirect (PRG pattern) ───────────────────
@@ -43,6 +37,7 @@ $error = match($_GET['e'] ?? '') {
     'fields'      => 'Completa todos los campos.',
     'invalid'     => 'Email o contraseña incorrectos.',
     'unconfirmed' => 'Confirma tu email antes de entrar.',
+    'callback'    => 'No se pudo completar la confirmación. Intenta entrar con tu contraseña.',
     'server'      => 'No se pudo iniciar sesión. Intenta de nuevo.',
     default       => '',
 };

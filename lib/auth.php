@@ -79,7 +79,22 @@ function getValidToken(): ?string {
 function getAuthUser(): ?array {
     $token = getValidToken();
     if (!$token) return null;
-    return verifyJWT($token, SUPABASE_JWT_SECRET);
+
+    $payload = verifyJWT($token, SUPABASE_JWT_SECRET);
+    if ($payload !== null) {
+        return $payload;
+    }
+
+    // ES256 / newer Supabase JWTs — verify via Auth API
+    $user = supabaseGetUser($token);
+    if (!$user) {
+        return null;
+    }
+
+    return [
+        'sub'   => $user['id'],
+        'email' => $user['email'] ?? '',
+    ];
 }
 
 /**

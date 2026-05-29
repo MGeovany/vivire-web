@@ -1,12 +1,6 @@
 <?php
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/../lib/supabase.php';
-require_once __DIR__ . '/../templates/layout.php';
-
 if (getAuthUser()) { header('Location: /'); exit; }
 
-// ── POST: create account, then ALWAYS redirect (PRG pattern) ─────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name     = trim($_POST['name']     ?? '');
     $email    = trim($_POST['email']    ?? '');
@@ -21,34 +15,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $result = supabaseAuthRequest('POST', '/signup', [
+    $redirectTo = rtrim(APP_URL, '/') . '/auth/callback';
+
+    $result = supabaseAuthRequest('POST', '/signup?redirect_to=' . urlencode($redirectTo), [
         'email'    => $email,
         'password' => $password,
         'data'     => ['name' => $name],
     ]);
 
-    if (isset($result['access_token'])) {
+    // Log response in dev for debugging
+    error_log('[vivire] signup response: ' . json_encode($result));
+
+    // Auto-confirmed signup — access_token at root level
+    if (!empty($result['access_token'])) {
         setAuthCookies($result);
         header('Location: /');
         exit;
     }
-    if (isset($result['id'])) {
-        // Email confirmation required
+
+    // Email confirmation required — user object returned without session
+    $userId = $result['id'] ?? $result['user']['id'] ?? null;
+    if ($userId) {
         header('Location: /login?confirm=1');
         exit;
     }
 
-    $msg  = $result['error_description'] ?? $result['msg'] ?? $result['message'] ?? '';
+    // Error
+    $msg  = $result['error_description'] ?? $result['msg'] ?? $result['message'] ?? $result['error'] ?? '';
+    error_log('[vivire] signup error: ' . $msg);
+
     $code = match(true) {
-        str_contains($msg, 'already registered') => 'taken',
-        str_contains($msg, 'invalid email')      => 'email',
-        default                                   => 'server',
+        str_contains((string)$msg, 'already registered')   => 'taken',
+        str_contains((string)$msg, 'User already registered') => 'taken',
+        str_contains((string)$msg, 'invalid email')        => 'email',
+        default                                             => 'server',
     };
-    header('Location: /register?e=' . $code . '&name=' . urlencode($name) . '&email=' . urlencode($email));
+
+    // In dev, surface raw error via URL so it shows in the form
+    $debugParam = IS_DEV ? '&dbg=' . urlencode(substr((string)$msg, 0, 120)) : '';
+    header('Location: /register?e=' . $code . $debugParam . '&name=' . urlencode($name) . '&email=' . urlencode($email));
     exit;
 }
 
-// ── GET: render form ──────────────────────────────────────────────────────────
+// GET ─────────────────────────────────────────────────────────────────────────
 $error = match($_GET['e'] ?? '') {
     'fields' => 'Completa todos los campos.',
     'short'  => 'La contraseña debe tener al menos 6 caracteres.',
@@ -57,6 +66,11 @@ $error = match($_GET['e'] ?? '') {
     'server' => 'No se pudo crear la cuenta. Intenta de nuevo.',
     default  => '',
 };
+// Dev: show raw Supabase message
+if (IS_DEV && !empty($_GET['dbg'])) {
+    $error = '[dev] ' . htmlspecialchars(urldecode($_GET['dbg']));
+}
+
 $name  = htmlspecialchars($_GET['name']  ?? '');
 $email = htmlspecialchars($_GET['email'] ?? '');
 
@@ -79,7 +93,7 @@ layout_head('vivire — Crear cuenta');
              value="<?= $email ?>">
       <input type="password" name="password" placeholder="Contraseña (mín. 6 car.)" autocomplete="new-password">
 
-      <p class="auth-error"><?= htmlspecialchars($error) ?></p>
+      <p class="auth-error"><?= $error ?></p>
 
       <button type="submit" class="auth-submit">Crear cuenta</button>
     </form>

@@ -12,7 +12,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r): void {
     $r->addRoute(['GET', 'POST'], '/',         'home');
     $r->addRoute(['GET', 'POST'], '/login',    'login');
     $r->addRoute(['GET', 'POST'], '/register', 'register');
-    $r->addRoute(['GET', 'POST'], '/logout',   'logout');
+    $r->addRoute(['GET', 'POST'], '/logout',        'logout');
+    $r->addRoute('GET',          '/auth/callback', 'auth_callback');
+    $r->addRoute('POST',         '/auth/session',  'auth_session');
     $r->addRoute('POST',          '/api/save',   'api_save');
     $r->addRoute('POST',          '/api/upload', 'api_upload');
 });
@@ -38,7 +40,9 @@ switch ($route[0]) {
             'home'       => require "$root/handlers/home.php",
             'login'      => require "$root/auth/login.php",
             'register'   => require "$root/auth/register.php",
-            'logout'     => require "$root/auth/logout.php",
+            'logout'        => require "$root/auth/logout.php",
+            'auth_callback' => require "$root/auth/callback.php",
+            'auth_session'  => require "$root/auth/session.php",
             'api_save'   => require "$root/api/save.php",
             'api_upload' => require "$root/api/upload.php",
         };
