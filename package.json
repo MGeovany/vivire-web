@@ -1,27 +1,18 @@
 {
-  "name": "vivire-web",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "copy:dict": "node scripts/copy-dict.mjs",
-    "build:spell": "node scripts/copy-dict.mjs && esbuild src/spell-check.js --bundle --format=iife --global-name=VivireSpell --outfile=public/js/spell-check.js",
-    "build:css": "tailwindcss -i src/tailwind-input.css -o public/css/tailwind.css",
-    "build:css:min": "tailwindcss -i src/tailwind-input.css -o public/css/tailwind.css --minify",
-    "watch:css": "tailwindcss -i src/tailwind-input.css -o public/css/tailwind.css --watch",
-    "postinstall": "pnpm copy:dict"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@9.6.0+sha512.38dc6fba8dba35b39340b9700112c2fe1e12f10b17134715a4aa98ccf7bb035e76fd981cf0bb384dfa98f8d6af5481c2bef2f4266a24bfa20c34eb7147ce0b5e",
-  "dependencies": {
-    "@tailwindcss/cli": "^4.3.0",
-    "dictionary-es": "^4.0.0",
-    "nspell": "^2.1.5",
-    "tailwindcss": "^4.3.0"
-  },
-  "devDependencies": {
-    "esbuild": "^0.28.0"
-  }
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build"
+    },
+    "devDependencies": {
+        "@tailwindcss/forms": "^0.5.2",
+        "autoprefixer": "^10.4.2",
+        "axios": "^1.6.4",
+        "laravel-vite-plugin": "^1.0.0",
+        "postcss": "^8.4.31",
+        "tailwindcss": "^3.1.0",
+        "vite": "^5.0.0"
+    },
+    "packageManager": "pnpm@9.6.0+sha512.38dc6fba8dba35b39340b9700112c2fe1e12f10b17134715a4aa98ccf7bb035e76fd981cf0bb384dfa98f8d6af5481c2bef2f4266a24bfa20c34eb7147ce0b5e"
 }

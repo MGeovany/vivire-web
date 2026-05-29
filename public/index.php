@@ -1,50 +1,55 @@
 <?php
 
-declare(strict_types=1);
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Http\Request;
 
-require dirname(__DIR__) . '/bootstrap.php';
+define('LARAVEL_START', microtime(true));
 
-use FastRoute\Dispatcher;
-use FastRoute\RouteCollector;
-use function FastRoute\simpleDispatcher;
+/*
+|--------------------------------------------------------------------------
+| Check If The Application Is Under Maintenance
+|--------------------------------------------------------------------------
+|
+| If the application is in maintenance / demo mode via the "down" command
+| we will load this file so that any pre-rendered content can be shown
+| instead of starting the framework, which could cause an exception.
+|
+*/
 
-$dispatcher = simpleDispatcher(function (RouteCollector $r): void {
-    $r->addRoute(['GET', 'POST'], '/',         'home');
-    $r->addRoute(['GET', 'POST'], '/login',    'login');
-    $r->addRoute(['GET', 'POST'], '/register', 'register');
-    $r->addRoute(['GET', 'POST'], '/logout',        'logout');
-    $r->addRoute('GET',          '/auth/callback', 'auth_callback');
-    $r->addRoute('POST',         '/auth/session',  'auth_session');
-    $r->addRoute('POST',          '/api/save',   'api_save');
-    $r->addRoute('POST',          '/api/upload', 'api_upload');
-});
-
-$method = $_SERVER['REQUEST_METHOD'];
-$uri    = rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/');
-$route  = $dispatcher->dispatch($method, $uri);
-
-switch ($route[0]) {
-    case Dispatcher::NOT_FOUND:
-        http_response_code(404);
-        echo '404 Not Found';
-        break;
-
-    case Dispatcher::METHOD_NOT_ALLOWED:
-        http_response_code(405);
-        echo '405 Method Not Allowed';
-        break;
-
-    case Dispatcher::FOUND:
-        $root = dirname(__DIR__);
-        match ($route[1]) {
-            'home'       => require "$root/handlers/home.php",
-            'login'      => require "$root/auth/login.php",
-            'register'   => require "$root/auth/register.php",
-            'logout'        => require "$root/auth/logout.php",
-            'auth_callback' => require "$root/auth/callback.php",
-            'auth_session'  => require "$root/auth/session.php",
-            'api_save'   => require "$root/api/save.php",
-            'api_upload' => require "$root/api/upload.php",
-        };
-        break;
+if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
+    require $maintenance;
 }
+
+/*
+|--------------------------------------------------------------------------
+| Register The Auto Loader
+|--------------------------------------------------------------------------
+|
+| Composer provides a convenient, automatically generated class loader for
+| this application. We just need to utilize it! We'll simply require it
+| into the script here so we don't need to manually load our classes.
+|
+*/
+
+require __DIR__.'/../vendor/autoload.php';
+
+/*
+|--------------------------------------------------------------------------
+| Run The Application
+|--------------------------------------------------------------------------
+|
+| Once we have the application, we can handle the incoming request using
+| the application's HTTP kernel. Then, we will send the response back
+| to this client's browser, allowing them to enjoy our application.
+|
+*/
+
+$app = require_once __DIR__.'/../bootstrap/app.php';
+
+$kernel = $app->make(Kernel::class);
+
+$response = $kernel->handle(
+    $request = Request::capture()
+)->send();
+
+$kernel->terminate($request, $response);
