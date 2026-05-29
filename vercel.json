@@ -22,6 +22,7 @@
     "APP_ENV": "production",
     "APP_DEBUG": "false",
     "APP_URL": "https://vivire-web.vercel.app",
+    "ASSET_URL": "https://vivire-web.vercel.app",
     "LOG_CHANNEL": "stderr",
     "LOG_LEVEL": "error",
     "CACHE_STORE": "array",
