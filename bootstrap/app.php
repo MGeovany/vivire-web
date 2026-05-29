@@ -18,6 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Render JSON when the client asks for it (Accept: application/json),
         // so /entries and /uploads return proper 422 payloads.
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
+            fn (Request $request) => $request->is('api/*')
+                || $request->is('livewire/*')
+                || $request->expectsJson(),
         );
     })->create();

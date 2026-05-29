@@ -4,7 +4,6 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
@@ -39,8 +38,6 @@ new #[Layout('layouts.guest')] class extends Component
             throw $e;
         }
 
-        $validated['password'] = Hash::make($validated['password']);
-
         try {
             event(new Registered($user = User::create($validated)));
         } catch (QueryException $e) {
@@ -49,6 +46,16 @@ new #[Layout('layouts.guest')] class extends Component
 
                 $this->dispatch('vivire-toast', message: $message, type: 'error');
                 $this->addError('email', $message);
+
+                return;
+            }
+
+            if ($this->isDatabaseUnavailable($e)) {
+                $this->dispatch(
+                    'vivire-toast',
+                    message: __('auth.database_unavailable'),
+                    type: 'error',
+                );
 
                 return;
             }
@@ -63,10 +70,24 @@ new #[Layout('layouts.guest')] class extends Component
 
     private function isDuplicateEmail(QueryException $e): bool
     {
+        if (($e->errorInfo[0] ?? '') === '23505') {
+            return str_contains(strtolower($e->getMessage()), 'email');
+        }
+
         $message = strtolower($e->getMessage());
 
-        return str_contains($message, 'unique constraint failed')
-            && str_contains($message, 'users.email');
+        return str_contains($message, 'unique')
+            && str_contains($message, 'email');
+    }
+
+    private function isDatabaseUnavailable(QueryException $e): bool
+    {
+        $message = strtolower($e->getMessage());
+
+        return in_array($e->errorInfo[0] ?? '', ['08006', '08001', '57P01', '53300'], true)
+            || str_contains($message, 'connection')
+            || str_contains($message, 'password supplied')
+            || str_contains($message, 'does not exist');
     }
 }; ?>
 
