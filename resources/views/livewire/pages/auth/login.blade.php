@@ -2,6 +2,7 @@
 
 use App\Livewire\Forms\LoginForm;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
@@ -13,7 +14,21 @@ new #[Layout('layouts.guest')] class extends Component
     {
         $this->validate();
 
-        $this->form->authenticate();
+        try {
+            $this->form->authenticate();
+        } catch (ValidationException $e) {
+            if ($e->validator->errors()->has('login')) {
+                $this->dispatch(
+                    'vivire-toast',
+                    message: $e->validator->errors()->first('login'),
+                    type: 'error',
+                );
+
+                return;
+            }
+
+            throw $e;
+        }
 
         Session::regenerate();
 

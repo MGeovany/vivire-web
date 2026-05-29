@@ -58,6 +58,10 @@ function wireLivewire() {
   if (!window.Livewire || window.__vivireToastWired) return;
   window.__vivireToastWired = true;
 
+  Livewire.on('vivire-toast', ({ message, type }) => {
+    showToast(message, type || 'info');
+  });
+
   Livewire.hook('commit', ({ succeed, fail }) => {
     showLoading();
     succeed(() => hideLoading());
