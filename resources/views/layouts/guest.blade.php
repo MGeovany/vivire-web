@@ -28,6 +28,8 @@
   </div>
 
   @livewireScripts
+  <link rel="stylesheet" href="{{ asset('css/sonner.css') }}">
+  <script src="{{ asset('js/toast.js') }}"></script>
   @include('partials.toast')
 </body>
 </html>

@@ -40,6 +40,8 @@
   {{ $slot }}
 
   @livewireScripts
+  <link rel="stylesheet" href="{{ asset('css/sonner.css') }}">
+  <script src="{{ asset('js/toast.js') }}"></script>
   @include('partials.toast')
   <script src="{{ asset('js/spell-check.js') }}"></script>
   <script src="{{ asset('js/editor.js') }}"></script>

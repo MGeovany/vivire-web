@@ -3,7 +3,9 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "tailwindcss -i resources/css/tailwind-input.css -o public/css/tailwind.css --minify",
+        "build": "pnpm build:css && pnpm build:toast",
+        "build:css": "tailwindcss -i resources/css/tailwind-input.css -o public/css/tailwind.css --minify",
+        "build:toast": "node scripts/build-toast.mjs",
         "watch": "tailwindcss -i resources/css/tailwind-input.css -o public/css/tailwind.css --watch"
     },
     "devDependencies": {
@@ -12,10 +14,16 @@
         "@tailwindcss/vite": "^4.0.0",
         "autoprefixer": "^10.4.2",
         "concurrently": "^9.0.1",
+        "esbuild": "^0.28.0",
         "laravel-vite-plugin": "^3.1",
         "postcss": "^8.4.31",
         "tailwindcss": "^4.3.0",
         "vite": "^8.0.0"
     },
-    "packageManager": "pnpm@9.6.0+sha512.38dc6fba8dba35b39340b9700112c2fe1e12f10b17134715a4aa98ccf7bb035e76fd981cf0bb384dfa98f8d6af5481c2bef2f4266a24bfa20c34eb7147ce0b5e"
+    "packageManager": "pnpm@9.6.0+sha512.38dc6fba8dba35b39340b9700112c2fe1e12f10b17134715a4aa98ccf7bb035e76fd981cf0bb384dfa98f8d6af5481c2bef2f4266a24bfa20c34eb7147ce0b5e",
+    "dependencies": {
+        "react": "^19.2.6",
+        "react-dom": "^19.2.6",
+        "sonner": "^2.0.7"
+    }
 }

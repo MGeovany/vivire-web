@@ -6,8 +6,8 @@
 @source "../../public/js/**/*.js";
 
 @theme {
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-write: "Source Serif 4", Georgia, serif;
+  --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-write: "Lora", Georgia, serif;
 
   --color-bg: #FAFAF9;
   --color-surface: #FFFFFF;
@@ -122,6 +122,10 @@
 }
 
 @layer base {
+  [x-cloak] {
+    display: none !important;
+  }
+
   ::selection {
     background: rgb(23 23 23 / 0.1);
   }

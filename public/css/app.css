@@ -1,15 +1,5 @@
 /* ─── Motion ──────────────────────────────────────────────────────────────── */
 
-.toast {
-  transition: opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
 .media-popup {
   opacity: 0;
   visibility: hidden;
@@ -156,37 +146,59 @@
   }
 }
 
-#app-toast { display: flex; align-items: center; gap: 9px; }
-#app-toast::before {
-  content: '';
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--color-muted, #C5C3BE);
-  flex-shrink: 0;
-}
-#app-toast.toast-error::before   { background: #E0625F; }
-#app-toast.toast-success::before { background: var(--color-success, #5C9E72); }
-#app-toast.toast-info::before    { background: var(--color-subtle, #9B9892); }
-#app-toast.toast-loading::before { background: var(--color-muted, #C5C3BE); animation: save-pulse 0.9s ease-in-out infinite; }
+/* ─── Sonner (vivire theme) ─────────────────────────────────────────────────── */
 
-#app-loading {
-  position: fixed; top: 0; left: 0;
-  height: 2px; width: 0;
-  background: var(--color-fg, #171717);
-  z-index: 2000; opacity: 0;
-  transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
-  pointer-events: none;
+[data-sonner-toaster] {
+  --width: auto;
+  font-family: inherit;
 }
-#app-loading.active { opacity: 1; }
+
+[data-sonner-toast].vivire-toast {
+  background: var(--color-fg, #171717);
+  color: var(--color-bg, #FAFAF9);
+  border: none;
+  border-radius: 9999px;
+  box-shadow: 0 8px 24px rgb(23 23 23 / 0.14);
+  font-size: 13px;
+  font-weight: 400;
+  padding: 10px 20px;
+  gap: 9px;
+}
+
+[data-sonner-toast].vivire-toast [data-icon] {
+  color: var(--color-bg, #FAFAF9);
+}
+
+[data-sonner-toast].vivire-toast-error [data-icon] {
+  color: #FCA5A5;
+}
+
+[data-sonner-toast].vivire-toast-success [data-icon] {
+  color: #86EFAC;
+}
+
+[data-sonner-toast].vivire-toast-loading [data-icon] {
+  color: var(--color-muted, #A8A29E);
+}
 
 .password-field { position: relative; }
-.password-field input { padding-right: 40px; }
+.password-field input { padding-right: 36px; }
 .password-toggle {
-  position: absolute; top: 50%; right: 10px;
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  z-index: 1;
   transform: translateY(-50%);
-  display: flex; align-items: center; justify-content: center;
-  width: 24px; height: 24px;
-  color: var(--color-subtle, #9B9892);
-  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: var(--color-muted, #A8A29E);
+  transition: color 0.15s ease;
 }
-.password-toggle:hover { color: var(--color-fg, #171717); }
+.password-toggle:hover { color: var(--color-subtle, #78716C); }
+.password-toggle svg {
+  width: 14px;
+  height: 14px;
+}

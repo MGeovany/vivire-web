@@ -309,18 +309,10 @@
   }
 
   // ── Toast ──────────────────────────────────────────────────────────────────
-  let toastTimer = null;
   function showToast(message) {
     if (typeof window.showToast === 'function') {
       window.showToast(message, 'error');
-      return;
     }
-    const el = document.getElementById('app-toast');
-    if (!el) return;
-    el.textContent = String(message || '').trim() || 'Error';
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
   }
 
   async function readApiError(res, fallback) {
@@ -461,21 +453,53 @@
     try {
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      const t    = audioCtx.currentTime;
+      const t = audioCtx.currentTime;
+
+      // Tonal body — a short mechanical "thock"
       const osc  = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-      // Lower thock for Enter/Space, crisper click for letters
-      const base = (k === 'Enter' || k === ' ') ? 130 : 200;
+      const base = (k === 'Enter' || k === ' ') ? 150 : 320;
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(base + Math.random() * 50, t);
+      osc.frequency.setValueAtTime(base + Math.random() * 60, t);
+      osc.frequency.exponentialRampToValueAtTime(base * 0.6, t + 0.05);
       gain.gain.setValueAtTime(0.0001, t);
-      gain.gain.exponentialRampToValueAtTime(0.07, t + 0.004);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.055);
+      gain.gain.exponentialRampToValueAtTime(0.26, t + 0.003);   // clearly audible
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
       osc.connect(gain).connect(audioCtx.destination);
       osc.start(t);
-      osc.stop(t + 0.06);
+      osc.stop(t + 0.1);
+
+      // Transient "click" on top — a tiny filtered noise burst for the key snap
+      const dur = 0.03;
+      const buf = audioCtx.createBuffer(1, Math.ceil(audioCtx.sampleRate * dur), audioCtx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buf;
+      const hp = audioCtx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = 1800;
+      const ng = audioCtx.createGain();
+      ng.gain.setValueAtTime(0.12, t);
+      ng.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      noise.connect(hp).connect(ng).connect(audioCtx.destination);
+      noise.start(t);
+      noise.stop(t + dur);
     } catch (_) { /* audio unavailable — ignore */ }
   }
+
+  // Unlock/resume the AudioContext on the very first user gesture (some browsers
+  // start it suspended until an explicit gesture).
+  function unlockAudio() {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (_) {}
+    document.removeEventListener('pointerdown', unlockAudio);
+    document.removeEventListener('keydown', unlockAudio);
+  }
+  document.addEventListener('pointerdown', unlockAudio);
+  document.addEventListener('keydown', unlockAudio);
 
   // Lucide icons: volume-2 (on) / volume-x (off)
   const LUCIDE_VOLUME_2 = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></svg>';
@@ -602,7 +626,15 @@
     initSoundToggle();
   }
 
-  document.addEventListener('DOMContentLoaded', boot);
-  document.addEventListener('livewire:navigated', boot);  // Livewire SPA navigation
+  // Run NOW if the DOM is already parsed. Critical for Livewire SPA navigation:
+  // when arriving at the journal via wire:navigate, this script executes AFTER
+  // `livewire:navigated` has already fired, so the listener alone would miss it.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+  // Future navigations back to the journal (listener persists in the SPA runtime).
+  document.addEventListener('livewire:navigated', boot);
 
 })();
