@@ -26,8 +26,14 @@
       if (res.ok) {
         setIndicator('saved');
         setTimeout(() => setIndicator(''), 2500);
+      } else {
+        setIndicator('');
+        showToast(await readApiError(res, 'No se pudo guardar'));
       }
-    } catch { /* silent — user will see no "Guardado" but data is safe on next attempt */ }
+    } catch {
+      setIndicator('');
+      showToast('Sin conexión. Intentaremos guardar de nuevo.');
+    }
   }
 
   // ── Block serialization ────────────────────────────────────────────────────
@@ -120,8 +126,13 @@
         const { url, name, size } = await res.json();
         editor.appendChild(buildMediaNode(type, url, name, size));
         scheduleAutoSave(editor);
+      } else {
+        showToast(await readApiError(res, 'No se pudo subir el archivo'));
       }
-    } catch { loader.remove(); }
+    } catch {
+      loader.remove();
+      showToast('Sin conexión. No se pudo subir el archivo.');
+    }
   }
 
   function buildMediaNode(type, url, name, size) {
@@ -200,6 +211,25 @@
     if (state === 'saving') { el.textContent = 'Guardando…'; el.classList.add('saving'); }
     else if (state === 'saved') { el.textContent = 'Guardado'; el.classList.add('saved'); }
     else el.textContent = '';
+  }
+
+  // ── Toast ──────────────────────────────────────────────────────────────────
+  let toastTimer = null;
+  function showToast(message) {
+    const el = document.getElementById('app-toast');
+    if (!el) return;
+    el.textContent = String(message || '').trim() || 'Error';
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+  }
+
+  async function readApiError(res, fallback) {
+    try {
+      const data = await res.json();
+      if (data && typeof data.error === 'string' && data.error.trim()) return data.error.trim();
+    } catch { /* ignore */ }
+    return fallback || 'Error';
   }
 
   // ── Utils ──────────────────────────────────────────────────────────────────
