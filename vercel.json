@@ -3,7 +3,7 @@
   "framework": null,
   "installCommand": "pnpm install",
   "buildCommand": "pnpm build",
-  "outputDirectory": "public",
+  "outputDirectory": "dist",
   "functions": {
     "api/index.php": { "runtime": "vercel-php@0.7.2" }
   },
