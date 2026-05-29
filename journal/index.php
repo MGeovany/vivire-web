@@ -37,6 +37,7 @@ layout_head('vivire');
     <div class="flex items-center gap-[18px]">
       <span class="font-serif text-sm italic text-subtle max-sm:text-[13px]"><?= htmlspecialchars(formatDate($today)) ?></span>
       <span class="save-indicator text-[11.5px] italic text-muted min-w-[68px] text-right select-none transition-colors duration-200" id="save-indicator"></span>
+      <button type="button" id="sound-toggle" class="text-sm leading-none transition-opacity duration-150 hover:opacity-70" title="Sonido de tecleo">🔊</button>
       <form method="POST" action="/logout" style="display:inline">
         <button type="submit" class="text-xs font-normal text-muted tracking-[0.02em] transition-colors duration-150 hover:text-subtle">Salir</button>
       </form>
@@ -115,6 +116,7 @@ layout_head('vivire');
 
 </div><!-- #app-screen -->
 
+<script src="/js/spell-check.js"></script>
 <script src="/js/editor.js"></script>
 <?php layout_foot();
 

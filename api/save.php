@@ -1,7 +1,4 @@
 <?php
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/../lib/entries.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -37,7 +34,26 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !in_array($section, $allowed,
     exit;
 }
 
-$ok = upsertEntry($user['sub'], $date, $section, $blocks);
+$result = upsertEntry($user['sub'], $date, $section, $blocks);
 
-http_response_code($ok ? 200 : 500);
-echo json_encode($ok ? ['ok' => true] : ['error' => 'Save failed']);
+if ($result['ok']) {
+    http_response_code(200);
+    echo json_encode(['ok' => true]);
+    exit;
+}
+
+http_response_code(500);
+$payload = ['error' => 'Save failed'];
+
+if (IS_DEV) {
+    $payload['detail'] = $result['message'];
+    if ($result['code']) {
+        $payload['code'] = $result['code'];
+    }
+    if ($result['code'] === 'PGRST205') {
+        $payload['hint'] = 'Run supabase/schema.sql in the Supabase SQL Editor.';
+    }
+    error_log('[vivire] save failed: ' . json_encode($result));
+}
+
+echo json_encode($payload);

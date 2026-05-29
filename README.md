@@ -65,6 +65,16 @@ Opens at **http://localhost:8080**.
 
 Set `APP_URL` in `.env` to match (default `http://localhost:8080`).
 
+### Frontend assets (Tailwind + spell checker)
+
+```bash
+pnpm install
+pnpm build:css      # Tailwind → public/css/tailwind.css
+pnpm build:spell    # nspell + diccionario ES → public/js/spell-check.js + public/dict/es/
+```
+
+The journal auto-corrects accents on **space** using Hunspell (`nspell` + `dictionary-es`). Dictionary files (~850 KB) load once on first visit.
+
 ### Supabase auth settings
 
 In Supabase → **Authentication → URL Configuration**:

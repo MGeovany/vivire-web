@@ -19,3 +19,74 @@
 .media-popup.open {
   display: block;
 }
+
+/* ─── Inline floating images (journal-style messy layout) ────────────────────
+   Images flow inline with the text; the surrounding text wraps around them for
+   as many lines as the image is tall. Size & side are random per image. ─────── */
+
+/* Contain the floats so they don't overflow the section below */
+.block-editor::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.block-media[data-block-type="image"] {
+  margin: 6px 0;
+}
+
+.block-media[data-block-type="image"][data-float="left"] {
+  float: left;
+  margin: 4px 24px 12px 0;
+  shape-outside: margin-box;
+}
+
+.block-media[data-block-type="image"][data-float="right"] {
+  float: right;
+  margin: 4px 0 12px 24px;
+  shape-outside: margin-box;
+}
+
+/* Random-ish sizes: small / medium / large */
+.block-media[data-block-type="image"][data-size="s"] { width: 32%; max-width: 170px; }
+.block-media[data-block-type="image"][data-size="m"] { width: 46%; max-width: 260px; }
+.block-media[data-block-type="image"][data-size="l"] { width: 62%; max-width: 360px; }
+
+.block-media[data-block-type="image"] img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: filter 0.15s, transform 0.15s;
+}
+
+/* Draggable affordance */
+.block-media[draggable="true"] { cursor: grab; }
+.block-media[draggable="true"]:hover img { filter: brightness(0.97); }
+.block-media.dragging { opacity: 0.4; cursor: grabbing; }
+
+/* Drop caret shown while repositioning an image */
+.drop-caret {
+  height: 0;
+  border-top: 2px solid #1C1B19;
+  margin: 2px 0;
+  border-radius: 2px;
+  opacity: 0.6;
+  clear: both;
+}
+
+/* Editor highlighted while dragging a file from the desktop */
+.block-editor.drop-active {
+  outline: 2px dashed #C5C3BE;
+  outline-offset: 8px;
+  border-radius: 8px;
+}
+
+/* On phones, floats get cramped — make images full-width blocks instead */
+@media (max-width: 600px) {
+  .block-media[data-block-type="image"] {
+    float: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 12px 0 !important;
+  }
+}

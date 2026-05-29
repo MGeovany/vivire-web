@@ -5,8 +5,9 @@
     }
   },
   "rewrites": [
-    { "source": "/css/(.*)", "destination": "/public/css/$1" },
-    { "source": "/js/(.*)",  "destination": "/public/js/$1"  },
+    { "source": "/css/(.*)",  "destination": "/public/css/$1"  },
+    { "source": "/js/(.*)",   "destination": "/public/js/$1"   },
+    { "source": "/dict/(.*)", "destination": "/public/dict/$1" },
     { "source": "/(.*)",     "destination": "/public/index.php" }
   ]
 }

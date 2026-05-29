@@ -19,8 +19,15 @@ function renderBlock(array $block, string $placeholder, bool $locked = false): v
         case 'image':
             $src = htmlspecialchars($content);
             $alt = htmlspecialchars($meta['name'] ?? 'Imagen');
-            echo "<div class=\"block-media my-3 relative\" data-block-id=\"" . htmlspecialchars($id) . "\" data-block-type=\"image\">"
-               . "<img src=\"{$src}\" alt=\"{$alt}\" loading=\"lazy\" class=\"max-w-full w-full h-auto rounded-lg border border-border block\">"
+            // Float side + size persist in metadata; fall back to a stable hash so
+            // old entries keep a consistent (but varied) layout across reloads.
+            $float = $meta['float'] ?? ((crc32($id) % 2) ? 'right' : 'left');
+            $size  = $meta['size']  ?? (['s', 'm', 'l'][crc32($id . 'z') % 3]);
+            $float = in_array($float, ['left', 'right'], true) ? $float : 'left';
+            $size  = in_array($size, ['s', 'm', 'l'], true) ? $size : 'm';
+            $drag  = $locked ? '' : ' draggable="true"';
+            echo "<div class=\"block-media\" data-block-id=\"" . htmlspecialchars($id) . "\" data-block-type=\"image\" data-float=\"{$float}\" data-size=\"{$size}\"{$drag}>"
+               . "<img src=\"{$src}\" alt=\"{$alt}\" loading=\"lazy\" class=\"w-full h-auto rounded-lg border border-border block\">"
                . "</div>\n";
             break;
 

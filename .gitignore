@@ -2,6 +2,7 @@
 .env.local
 .vercel
 vendor/
+public/dict/
 .DS_Store
 node_modules/
 public/css/tailwind.css
