@@ -21,8 +21,8 @@
   "env": {
     "APP_ENV": "production",
     "APP_DEBUG": "false",
-    "APP_URL": "https://vivire-web.vercel.app",
-    "ASSET_URL": "https://vivire-web.vercel.app",
+    "APP_URL": "https://vivire.thefndrs.com",
+    "ASSET_URL": "https://vivire.thefndrs.com",
     "LOG_CHANNEL": "stderr",
     "LOG_LEVEL": "error",
     "CACHE_STORE": "array",
