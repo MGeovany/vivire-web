@@ -34,7 +34,7 @@ class PasswordConfirmationTest extends TestCase
         $component->call('confirmPassword');
 
         $component
-            ->assertRedirect('/')
+            ->assertRedirect(route('journal', absolute: false))
             ->assertHasNoErrors();
     }
 

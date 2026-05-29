@@ -1,30 +1,85 @@
-/* ─── Tailwind can't do these — kept here ───────────────────────────────────── */
+/* ─── Motion ──────────────────────────────────────────────────────────────── */
 
-/* Placeholder text on empty contenteditable blocks */
-.block-text:empty::before {
-  content: attr(data-placeholder);
-  color: #C8C5BE;
-  pointer-events: none;
-  font-style: italic;
-  font-weight: 400;
+.toast {
+  transition: opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Toast visibility toggle (JS adds/removes .show) */
 .toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
 
-/* Media popup visibility toggle (JS adds/removes .open) */
-.media-popup.open {
-  display: block;
+.media-popup {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px) scale(0.97);
+  transform-origin: bottom left;
+  transition: opacity 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+              visibility 0.2s;
+  pointer-events: none;
 }
 
-/* ─── Inline floating images (journal-style messy layout) ────────────────────
-   Images flow inline with the text; the surrounding text wraps around them for
-   as many lines as the image is tall. Size & side are random per image. ─────── */
+.media-popup.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
 
-/* Contain the floats so they don't overflow the section below */
+.save-indicator.is-saving {
+  animation: save-pulse 1.1s ease-in-out infinite;
+}
+
+.save-indicator.is-saved {
+  animation: fade-in 0.35s ease-out both;
+}
+
+.block-media.is-new {
+  animation: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes save-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+.checkbox-check {
+  transform-origin: center;
+}
+
+.peer:checked ~ .checkbox-check {
+  animation: check-pop 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes check-pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ─── Editor ──────────────────────────────────────────────────────────────── */
+
+.block-text:empty::before {
+  content: attr(data-placeholder);
+  color: var(--color-muted);
+  pointer-events: none;
+  font-style: italic;
+  font-weight: 400;
+  opacity: 0.85;
+}
+
 .block-editor::after {
   content: '';
   display: block;
@@ -47,7 +102,6 @@
   shape-outside: margin-box;
 }
 
-/* Random-ish sizes: small / medium / large */
 .block-media[data-block-type="image"][data-size="s"] { width: 32%; max-width: 170px; }
 .block-media[data-block-type="image"][data-size="m"] { width: 46%; max-width: 260px; }
 .block-media[data-block-type="image"][data-size="l"] { width: 62%; max-width: 360px; }
@@ -56,32 +110,39 @@
   width: 100%;
   height: auto;
   display: block;
+  border-radius: 10px;
   transition: filter 0.15s, transform 0.15s;
 }
 
-/* Draggable affordance */
 .block-media[draggable="true"] { cursor: grab; }
-.block-media[draggable="true"]:hover img { filter: brightness(0.97); }
+.block-media[draggable="true"]:hover img { filter: brightness(0.97); transform: scale(1.005); }
 .block-media.dragging { opacity: 0.4; cursor: grabbing; }
 
-/* Drop caret shown while repositioning an image */
 .drop-caret {
   height: 0;
-  border-top: 2px solid #1C1B19;
+  border-top: 2px solid var(--color-accent);
   margin: 2px 0;
   border-radius: 2px;
-  opacity: 0.6;
+  opacity: 0.5;
   clear: both;
 }
 
-/* Editor highlighted while dragging a file from the desktop */
 .block-editor.drop-active {
-  outline: 2px dashed #C5C3BE;
+  outline: 2px dashed var(--color-muted);
   outline-offset: 8px;
-  border-radius: 8px;
+  border-radius: 10px;
+  transition: outline-color 0.2s ease;
 }
 
-/* On phones, floats get cramped — make images full-width blocks instead */
+.block-doc-card {
+  box-shadow: 0 1px 2px rgb(26 25 23 / 0.04);
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.block-doc-card:hover {
+  transform: translateY(-1px);
+}
+
 @media (max-width: 600px) {
   .block-media[data-block-type="image"] {
     float: none !important;
@@ -89,4 +150,43 @@
     max-width: 100% !important;
     margin: 12px 0 !important;
   }
+
+  .media-popup {
+    transform-origin: top left;
+  }
 }
+
+#app-toast { display: flex; align-items: center; gap: 9px; }
+#app-toast::before {
+  content: '';
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--color-muted, #C5C3BE);
+  flex-shrink: 0;
+}
+#app-toast.toast-error::before   { background: #E0625F; }
+#app-toast.toast-success::before { background: var(--color-success, #5C9E72); }
+#app-toast.toast-info::before    { background: var(--color-subtle, #9B9892); }
+#app-toast.toast-loading::before { background: var(--color-muted, #C5C3BE); animation: save-pulse 0.9s ease-in-out infinite; }
+
+#app-loading {
+  position: fixed; top: 0; left: 0;
+  height: 2px; width: 0;
+  background: var(--color-fg, #171717);
+  z-index: 2000; opacity: 0;
+  transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+  pointer-events: none;
+}
+#app-loading.active { opacity: 1; }
+
+.password-field { position: relative; }
+.password-field input { padding-right: 40px; }
+.password-toggle {
+  position: absolute; top: 50%; right: 10px;
+  transform: translateY(-50%);
+  display: flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px;
+  color: var(--color-subtle, #9B9892);
+  transition: color 0.15s;
+}
+.password-toggle:hover { color: var(--color-fg, #171717); }

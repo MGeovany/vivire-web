@@ -1,2 +1,8 @@
 User-agent: *
-Disallow:
+Disallow: /journal
+Disallow: /profile
+Disallow: /dashboard
+Disallow: /entries
+Disallow: /uploads
+
+Sitemap: /sitemap.xml

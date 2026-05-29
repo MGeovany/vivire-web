@@ -9,9 +9,6 @@ new #[Layout('layouts.guest')] class extends Component
 {
     public LoginForm $form;
 
-    /**
-     * Handle an incoming authentication request.
-     */
     public function login(): void
     {
         $this->validate();
@@ -25,42 +22,31 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    {{-- Tabs --}}
-    <div class="flex mb-7 border-b border-border">
-        <a href="{{ route('login') }}" wire:navigate class="text-[13.5px] text-fg pb-2 mr-[22px] border-b-[1.5px] border-fg -mb-px">Entrar</a>
-        <a href="{{ route('register') }}" wire:navigate class="text-[13.5px] text-subtle pb-2 mr-[22px] border-b-[1.5px] border-transparent -mb-px transition-colors hover:text-fg">Crear cuenta</a>
-    </div>
+    <x-ui.auth-tabs active="login" class="animate-fade-in" style="animation-delay: 100ms" />
 
     @if (session('status'))
-        <p class="text-[12.5px] text-success mb-3">{{ session('status') }}</p>
+        <p class="text-[12.5px] text-success mb-4 px-3 py-2 bg-success/10 rounded-lg animate-fade-in">{{ session('status') }}</p>
     @endif
 
-    <form wire:submit="login" class="flex flex-col gap-3">
+    <form wire:submit="login" class="flex flex-col gap-1 mt-2 animate-fade-up" style="animation-delay: 140ms">
         <div>
-            <input wire:model="form.email" type="email" name="email" required autofocus autocomplete="username"
-                   placeholder="Email"
-                   class="w-full px-[14px] py-[11px] text-sm bg-white border border-border rounded-lg outline-none transition focus:border-fg focus:ring-[3px] focus:ring-fg/[0.06] placeholder:text-muted">
-            @error('form.email') <p class="text-[12.5px] text-error mt-1">{{ $message }}</p> @enderror
+            <x-ui.input wire:model="form.email" type="email" name="email" required autofocus autocomplete="username" placeholder="Email" />
+            <x-ui.error :messages="$errors->get('form.email')" />
         </div>
 
         <div>
-            <input wire:model="form.password" type="password" name="password" required autocomplete="current-password"
-                   placeholder="Contraseña"
-                   class="w-full px-[14px] py-[11px] text-sm bg-white border border-border rounded-lg outline-none transition focus:border-fg focus:ring-[3px] focus:ring-fg/[0.06] placeholder:text-muted">
-            @error('form.password') <p class="text-[12.5px] text-error mt-1">{{ $message }}</p> @enderror
+            <x-ui.input wire:model="form.password" type="password" name="password" required autocomplete="current-password" placeholder="Contraseña" />
+            <x-ui.error :messages="$errors->get('form.password')" />
         </div>
 
-        <label class="inline-flex items-center gap-2 text-[12.5px] text-subtle select-none">
-            <input wire:model="form.remember" id="remember" type="checkbox" class="rounded border-border text-fg focus:ring-0">
-            Recordarme
-        </label>
+        <x-ui.checkbox wire:model="form.remember" id="remember" label="Recordarme" />
 
-        <button type="submit" class="mt-1 px-[14px] py-[11px] text-sm font-medium text-bg bg-fg rounded-lg transition hover:opacity-[0.82] tracking-[0.01em]">
-            Entrar
-        </button>
+        <x-ui.button class="mt-2">Entrar</x-ui.button>
 
         @if (Route::has('password.request'))
-            <a href="{{ route('password.request') }}" wire:navigate class="text-[12.5px] text-muted hover:text-subtle transition-colors text-center">¿Olvidaste tu contraseña?</a>
+            <a href="{{ route('password.request') }}" wire:navigate class="text-[13px] text-muted hover:text-subtle transition-colors text-center pt-4">
+                ¿Olvidaste tu contraseña?
+            </a>
         @endif
     </form>
 </div>

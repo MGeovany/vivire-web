@@ -208,7 +208,7 @@
   }
 
   function buildMediaNode(type, url, name, size) {
-    const wrap = mkEl('div', type === 'image' ? 'block-media' : 'block-media my-3 relative');
+    const wrap = mkEl('div', (type === 'image' ? 'block-media' : 'block-media my-3 relative') + ' is-new');
     wrap.dataset.blockId   = uid();
     wrap.dataset.blockType = type;
 
@@ -247,35 +247,45 @@
   }
 
   // ── Media popup ────────────────────────────────────────────────────────────
+  let popupDocBound = false;
+
   function initMediaPopups() {
-    document.querySelectorAll('.add-media-btn').forEach(btn => {
+    document.querySelectorAll('.add-media-btn, [title="Añadir media"]').forEach(btn => {
+      if (btn.dataset.vivireReady) return;
+      btn.dataset.vivireReady = '1';
+
       const popup = btn.nextElementSibling;
-      if (!popup?.classList.contains('media-popup')) return;
+      if (!popup || !popup.classList.contains('media-popup')) return;
 
       btn.addEventListener('click', e => {
         e.stopPropagation();
+        const isOpen = popup.classList.contains('open');
         closeAllPopups();
-        popup.classList.add('open');
+        if (!isOpen) popup.classList.add('open');
       });
 
-      popup.querySelectorAll('.media-popup-item').forEach(item => {
+      popup.querySelectorAll('.media-popup-item, [data-type]').forEach(item => {
         item.addEventListener('click', () => {
           closeAllPopups();
           const input  = document.createElement('input');
           input.type   = 'file';
-          input.accept = item.dataset.accept;
+          input.accept = item.dataset.accept || '*/*';
           input.addEventListener('change', async () => {
             const file = input.files?.[0];
             if (!file) return;
-            const editor = btn.closest('.journal-section')?.querySelector('.block-editor');
-            if (editor) await uploadAndAppend(editor, item.dataset.type, file);
+            const editor = btn.closest('[data-section]')?.querySelector('.block-editor')
+                        || btn.closest('.journal-section')?.querySelector('.block-editor');
+            if (editor) await uploadAndAppend(editor, item.dataset.type, file, null);
           });
           input.click();
         });
       });
     });
 
-    document.addEventListener('click', closeAllPopups);
+    if (!popupDocBound) {
+      popupDocBound = true;
+      document.addEventListener('click', closeAllPopups);
+    }
   }
 
   function closeAllPopups() {
@@ -286,15 +296,25 @@
   function setIndicator(state) {
     const el = document.getElementById('save-indicator');
     if (!el) return;
-    el.className = 'text-[11.5px] italic text-muted min-w-[68px] text-right select-none transition-colors duration-200';
-    if (state === 'saving') { el.textContent = 'Guardando…'; el.classList.add('text-dim'); }
-    else if (state === 'saved') { el.textContent = 'Guardado'; el.classList.add('text-success'); }
-    else el.textContent = '';
+    el.className = 'save-indicator text-[11px] text-muted min-w-[68px] text-right select-none transition-colors duration-200';
+    if (state === 'saving') {
+      el.textContent = 'Guardando…';
+      el.classList.add('text-dim', 'is-saving');
+    } else if (state === 'saved') {
+      el.textContent = 'Guardado';
+      el.classList.add('text-success', 'is-saved');
+    } else {
+      el.textContent = '';
+    }
   }
 
   // ── Toast ──────────────────────────────────────────────────────────────────
   let toastTimer = null;
   function showToast(message) {
+    if (typeof window.showToast === 'function') {
+      window.showToast(message, 'error');
+      return;
+    }
     const el = document.getElementById('app-toast');
     if (!el) return;
     el.textContent = String(message || '').trim() || 'Error';
@@ -314,7 +334,7 @@
   // ── Utils ──────────────────────────────────────────────────────────────────
   function makeTextBlock(placeholder) {
     const d = document.createElement('div');
-    d.className       = 'block-text w-full font-lora text-[17px] font-normal leading-[1.78] text-fg outline-none border-none bg-transparent py-[2px] caret-fg break-words whitespace-pre-wrap';
+    d.className       = 'block-text w-full font-write text-[17px] font-normal leading-[1.75] text-fg outline-none border-none bg-transparent py-0.5 caret-accent break-words whitespace-pre-wrap max-sm:text-[16px]';
     d.contentEditable = 'true';
     d.dataset.placeholder = placeholder;
     return d;
@@ -440,6 +460,7 @@
     if (!printable) return;
     try {
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
       const t    = audioCtx.currentTime;
       const osc  = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
@@ -456,17 +477,26 @@
     } catch (_) { /* audio unavailable — ignore */ }
   }
 
+  // Lucide icons: volume-2 (on) / volume-x (off)
+  const LUCIDE_VOLUME_2 = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></svg>';
+  const LUCIDE_VOLUME_X = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><line x1="22" x2="16" y1="9" y2="15"/><line x1="16" x2="22" y1="9" y2="15"/></svg>';
+
   function initSoundToggle() {
     const btn = document.getElementById('sound-toggle');
-    if (!btn) return;
+    if (!btn || btn.dataset.vivireReady) return;
+    btn.dataset.vivireReady = '1';
+
     const paint = () => {
-      btn.textContent = soundOn ? '🔊' : '🔇';
+      btn.innerHTML = soundOn ? LUCIDE_VOLUME_2 : LUCIDE_VOLUME_X;
       btn.title = soundOn ? 'Sonido de tecleo: activado' : 'Sonido de tecleo: silenciado';
+      btn.classList.toggle('text-fg', soundOn);
+      btn.classList.toggle('text-muted', !soundOn);
     };
     paint();
     btn.addEventListener('click', () => {
       soundOn = !soundOn;
       localStorage.setItem('vivire_sound', soundOn ? 'on' : 'off');
+      if (soundOn && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
       paint();
     });
   }
@@ -552,15 +582,27 @@
   function clearCaret() { if (caretEl && caretEl.parentNode) caretEl.parentNode.removeChild(caretEl); }
 
   // ── Boot ───────────────────────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', async () => {
-    try {
-      await window.VivireSpell?.init?.();
-    } catch (err) {
-      console.warn('[vivire] corrector ortográfico no disponible', err);
+  // Runs on first load AND on Livewire SPA navigation (login redirects with
+  // navigate:true, so DOMContentLoaded never fires again on the journal page).
+  // Idempotent: editors/buttons are flagged so re-runs don't double-bind.
+  let spellInitStarted = false;
+
+  function boot() {
+    if (!spellInitStarted) {
+      spellInitStarted = true;
+      Promise.resolve(window.VivireSpell?.init?.()).catch(err =>
+        console.warn('[vivire] corrector ortográfico no disponible', err));
     }
-    document.querySelectorAll('.block-editor:not(.locked)').forEach(initEditor);
+    document.querySelectorAll('.block-editor:not(.locked)').forEach(editor => {
+      if (editor.dataset.vivireReady) return;
+      editor.dataset.vivireReady = '1';
+      initEditor(editor);
+    });
     initMediaPopups();
     initSoundToggle();
-  });
+  }
+
+  document.addEventListener('DOMContentLoaded', boot);
+  document.addEventListener('livewire:navigated', boot);  // Livewire SPA navigation
 
 })();

@@ -1,31 +1,81 @@
 @import "tailwindcss";
 
-/* Scan Blade views, Livewire components and the editor JS for class usage */
 @source "../views/**/*.blade.php";
 @source "../../app/Livewire/**/*.php";
 @source "../../app/Support/**/*.php";
 @source "../../public/js/**/*.js";
 
 @theme {
-  --font-serif: "DM Serif Display", serif;
-  --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-lora: "Lora", Georgia, serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-write: "Source Serif 4", Georgia, serif;
 
-  --color-bg: #F9F8F6;
-  --color-fg: #1C1B19;
-  --color-border: #E5E3DE;
-  --color-muted: #C5C3BE;
-  --color-subtle: #9B9892;
-  --color-dim: #B5B3AE;
-  --color-error: #B84040;
-  --color-success: #5C9E72;
-  --color-hover: #F4F3F1;
-  --color-badge: #EEECE8;
-  --color-locked: #D0CEC9;
+  --color-bg: #FAFAF9;
+  --color-surface: #FFFFFF;
+  --color-fg: #171717;
+  --color-border: #E7E5E4;
+  --color-muted: #A8A29E;
+  --color-subtle: #78716C;
+  --color-dim: #A8A29E;
+  --color-error: #DC2626;
+  --color-success: #16A34A;
+  --color-hover: #F5F5F4;
+  --color-badge: #F5F5F4;
+  --color-locked: #D6D3D1;
+  --color-accent: #171717;
 }
 
 @keyframes spin-custom {
   to { transform: rotate(360deg); }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes check-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes save-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+@utility animate-fade-up {
+  animation: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility animate-fade-in {
+  animation: fade-in 0.45s ease-out both;
+}
+
+@utility animate-scale-in {
+  animation: scale-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @utility spinner {
@@ -38,7 +88,44 @@
   flex-shrink: 0;
 }
 
+@utility vivire-input {
+  @apply w-full px-0 py-3.5 text-[15px] bg-transparent border-0 border-b border-border
+         rounded-none outline-none transition-colors duration-200 placeholder:text-muted/80 text-fg
+         focus:border-fg;
+}
+
+@utility vivire-btn {
+  @apply inline-flex items-center justify-center px-4 py-3.5 text-[14px] font-normal text-bg bg-accent
+         rounded-full transition-all duration-200 tracking-[-0.01em]
+         hover:bg-fg/90 hover:scale-[1.01] active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none;
+}
+
+@utility vivire-btn-ghost {
+  @apply inline-flex items-center justify-center px-2 py-1.5 text-[13px] text-subtle
+         rounded-md transition-colors duration-150 hover:text-fg;
+}
+
+@utility section-label {
+  @apply text-[11px] font-normal tracking-[0.08em] uppercase text-muted;
+}
+
+@utility sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 @layer base {
+  ::selection {
+    background: rgb(23 23 23 / 0.1);
+  }
+
   button {
     font-family: inherit;
     cursor: pointer;
@@ -46,11 +133,21 @@
     background: none;
     padding: 0;
   }
+
   input, textarea {
     font-family: inherit;
   }
+
   a {
     color: inherit;
     text-decoration: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }

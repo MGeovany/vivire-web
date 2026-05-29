@@ -9,8 +9,10 @@ class ExampleTest extends TestCase
     /**
      * The app boots and sends guests to the login screen.
      */
-    public function test_the_application_redirects_guests_to_login(): void
+    public function test_the_application_renders_the_landing_page_for_guests(): void
     {
-        $this->get('/')->assertRedirect('/login');
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('vivire');
     }
 }

@@ -5,8 +5,8 @@ namespace App\Support;
 class Blocks
 {
     /** Tailwind classes shared by every editable text block. */
-    public const TEXT_CLASSES = 'block-text w-full font-lora text-[17px] font-normal leading-[1.78] '
-        . 'text-fg outline-none border-none bg-transparent py-[2px] caret-fg break-words '
+    public const TEXT_CLASSES = 'block-text w-full font-write text-[17px] font-normal leading-[1.75] '
+        . 'text-fg outline-none border-none bg-transparent py-0.5 caret-accent break-words '
         . 'whitespace-pre-wrap max-sm:text-[16px]';
 
     /**
