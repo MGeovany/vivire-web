@@ -1,4 +1,6 @@
 {
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm build",
   "functions": {
     "api/index.php": { "runtime": "vercel-php@0.7.2" }
   },

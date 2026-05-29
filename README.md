@@ -33,9 +33,17 @@ Set your Supabase Postgres **Transaction pooler** (IPv4):
 ## Deploy (Vercel)
 
 1. Push to GitHub.
-1. Import the repo in Vercel.
-1. Add the same env vars in Vercel.
-1. Run migrations from your machine/CI: `php artisan migrate --force`.
+2. Import the repo in Vercel (Framework: **Other** — not Vite).
+3. **No pongas `composer install` en el build command.** Vercel no tiene PHP ahí; `vercel-php` ejecuta Composer automáticamente. El build de assets ya está en `vercel.json`:
+
+   ```
+   installCommand: pnpm install
+   buildCommand: pnpm build
+   ```
+
+   Si lo configuraste a mano en el dashboard, bórralo o déjalo vacío para que use `vercel.json`.
+4. Add env vars in Vercel (see `.env.example`).
+5. Run migrations from your machine/CI: `php artisan migrate --force` (direct Postgres, port 5432).
 
 ## Legacy
 
