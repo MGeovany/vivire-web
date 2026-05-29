@@ -2,12 +2,17 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "pnpm install",
-  "buildCommand": "pnpm build",
-  "outputDirectory": "dist",
+  "buildCommand": "pnpm build:css && pnpm build:toast && pnpm build:typing-sound",
   "functions": {
     "api/index.php": { "runtime": "vercel-php@0.7.2" }
   },
   "rewrites": [
+    { "source": "/css/(.*)", "destination": "/public/css/$1" },
+    { "source": "/js/(.*)", "destination": "/public/js/$1" },
+    { "source": "/dict/(.*)", "destination": "/public/dict/$1" },
+    { "source": "/favicon.ico", "destination": "/public/favicon.ico" },
+    { "source": "/robots.txt", "destination": "/public/robots.txt" },
+    { "source": "/index.php", "destination": "/api/index.php" },
     { "source": "/(.*)", "destination": "/api/index.php" }
   ]
 }

@@ -3,7 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "pnpm build:css && pnpm build:toast && pnpm build:typing-sound && node scripts/sync-dist.mjs",
+        "build": "pnpm build:css && pnpm build:toast && pnpm build:typing-sound",
         "build:css": "tailwindcss -i resources/css/tailwind-input.css -o public/css/tailwind.css --minify",
         "build:toast": "node scripts/build-toast.mjs",
         "build:typing-sound": "node scripts/build-typing-sound.mjs",
