@@ -29,7 +29,3 @@ Set your Supabase Postgres **Transaction pooler** (IPv4):
 - `DB_USERNAME=postgres.<project_ref>`
 - `DB_PASSWORD=...`
 - `DB_SSLMODE=require`
-
-## Legacy
-
-Previous PHP app is kept in `legacy/`.
