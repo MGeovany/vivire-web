@@ -14,4 +14,4 @@ if (! is_dir($tmpViews)) {
 putenv("VIEW_COMPILED_PATH={$tmpViews}");
 $_ENV['VIEW_COMPILED_PATH'] = $_SERVER['VIEW_COMPILED_PATH'] = $tmpViews;
 
-require __DIR__ . '/../public/index.php';
+require __DIR__ . '/../bootstrap/request.php';

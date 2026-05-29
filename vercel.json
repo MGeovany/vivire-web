@@ -1,18 +1,21 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
+  "version": 2,
   "installCommand": "pnpm install",
   "buildCommand": "pnpm build:css && pnpm build:toast && pnpm build:typing-sound",
-  "functions": {
-    "api/index.php": { "runtime": "vercel-php@0.7.2" }
-  },
-  "rewrites": [
-    { "source": "/css/(.*)", "destination": "/public/css/$1" },
-    { "source": "/js/(.*)", "destination": "/public/js/$1" },
-    { "source": "/dict/(.*)", "destination": "/public/dict/$1" },
-    { "source": "/favicon.ico", "destination": "/public/favicon.ico" },
-    { "source": "/robots.txt", "destination": "/public/robots.txt" },
-    { "source": "/index.php", "destination": "/api/index.php" },
-    { "source": "/(.*)", "destination": "/api/index.php" }
+  "builds": [
+    { "src": "api/index.php", "use": "vercel-php@0.7.2" },
+    { "src": "public/css/**", "use": "@vercel/static" },
+    { "src": "public/js/**", "use": "@vercel/static" },
+    { "src": "public/dict/**", "use": "@vercel/static" },
+    { "src": "public/favicon.ico", "use": "@vercel/static" },
+    { "src": "public/robots.txt", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/css/(.*)", "dest": "/public/css/$1" },
+    { "src": "/js/(.*)", "dest": "/public/js/$1" },
+    { "src": "/dict/(.*)", "dest": "/public/dict/$1" },
+    { "src": "/favicon.ico", "dest": "/public/favicon.ico" },
+    { "src": "/robots.txt", "dest": "/public/robots.txt" },
+    { "src": "/(.*)", "dest": "/api/index.php" }
   ]
 }

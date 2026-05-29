@@ -11,3 +11,5 @@
 .phpunit.result.cache
 tests
 legacy
+public/index.php
+public/.htaccess
