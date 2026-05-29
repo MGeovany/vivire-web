@@ -34,14 +34,11 @@ Set your Supabase Postgres **Transaction pooler** (IPv4):
 
 1. Push to GitHub.
 2. Import the repo in Vercel (Framework: **Other** — not Vite).
-3. **No pongas `composer install` en el build command.** Vercel no tiene PHP ahí; `vercel-php` ejecuta Composer automáticamente. El build de assets ya está en `vercel.json`:
-
-   ```
-   installCommand: pnpm install
-   buildCommand: pnpm build
-   ```
-
-   Si lo configuraste a mano en el dashboard, bórralo o déjalo vacío para que use `vercel.json`.
+3. In **Settings → Build & Development**, disable overrides or set:
+   - **Framework Preset:** Other
+   - **Output Directory:** leave empty (uses `public` from `vercel.json`)
+   - **Build Command:** leave empty (uses `pnpm build` from `vercel.json`)
+   - **Do not** set `dist` as output — this is Laravel, not Vite.
 4. Add env vars in Vercel (see `.env.example`).
 5. Run migrations from your machine/CI: `php artisan migrate --force` (direct Postgres, port 5432).
 
