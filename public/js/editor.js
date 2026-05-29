@@ -117,8 +117,8 @@
 
   // ── File upload ────────────────────────────────────────────────────────────
   async function uploadAndAppend(editor, type, file) {
-    const loader = mkEl('div', 'block-media-uploading');
-    loader.innerHTML = '<div class="uploading-spinner"></div> Subiendo…';
+    const loader = mkEl('div', 'flex items-center gap-[10px] py-3 text-sm text-dim italic');
+    loader.innerHTML = '<div class="spinner"></div> Subiendo…';
     editor.appendChild(loader);
 
     const form = new FormData();
@@ -147,31 +147,34 @@
   }
 
   function buildMediaNode(type, url, name, size) {
-    const wrap = mkEl('div', 'block-media');
+    const wrap = mkEl('div', 'block-media my-3 relative');
     wrap.dataset.blockId   = uid();
     wrap.dataset.blockType = type;
 
     if (type === 'image') {
       const img = document.createElement('img');
       img.src = url; img.alt = name; img.loading = 'lazy';
+      img.className = 'max-w-full w-full h-auto rounded-lg border border-border block';
       wrap.appendChild(img);
     } else if (type === 'audio') {
       const a = document.createElement('audio');
       a.src = url; a.controls = true;
+      a.className = 'w-full my-1 accent-fg h-9';
       wrap.appendChild(a);
     } else if (type === 'video') {
       const v = document.createElement('video');
       v.src = url; v.controls = true; v.playsInline = true;
+      v.className = 'max-w-full w-full rounded-lg border border-border block';
       wrap.appendChild(v);
     } else if (type === 'document') {
       const a = document.createElement('a');
       a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
-      a.className = 'block-doc-card';
+      a.className = 'block-doc-card flex items-center gap-3 px-4 py-3 border border-border rounded-lg transition-[border-color,background] duration-150 hover:border-muted hover:bg-white';
       a.innerHTML =
-        `<span class="block-doc-icon">${docIcon(name)}</span>` +
-        `<div class="block-doc-info">` +
-          `<div class="block-doc-name">${esc(name)}</div>` +
-          `<div class="block-doc-meta" data-size="${size}">${fmtSize(size)}</div>` +
+        `<span class="block-doc-icon text-lg shrink-0">${docIcon(name)}</span>` +
+        `<div class="block-doc-info min-w-0">` +
+          `<div class="block-doc-name text-[13.5px] text-fg truncate">${esc(name)}</div>` +
+          `<div class="block-doc-meta text-[11.5px] text-subtle mt-px" data-size="${size}">${fmtSize(size)}</div>` +
         `</div>`;
       wrap.appendChild(a);
     }
@@ -218,9 +221,9 @@
   function setIndicator(state) {
     const el = document.getElementById('save-indicator');
     if (!el) return;
-    el.className = 'save-indicator';
-    if (state === 'saving') { el.textContent = 'Guardando…'; el.classList.add('saving'); }
-    else if (state === 'saved') { el.textContent = 'Guardado'; el.classList.add('saved'); }
+    el.className = 'text-[11.5px] italic text-muted min-w-[68px] text-right select-none transition-colors duration-200';
+    if (state === 'saving') { el.textContent = 'Guardando…'; el.classList.add('text-dim'); }
+    else if (state === 'saved') { el.textContent = 'Guardado'; el.classList.add('text-success'); }
     else el.textContent = '';
   }
 
@@ -246,7 +249,7 @@
   // ── Utils ──────────────────────────────────────────────────────────────────
   function makeTextBlock(placeholder) {
     const d = document.createElement('div');
-    d.className       = 'block-text';
+    d.className       = 'block-text w-full font-lora text-[17px] font-normal leading-[1.78] text-fg outline-none border-none bg-transparent py-[2px] caret-fg break-words whitespace-pre-wrap';
     d.contentEditable = 'true';
     d.dataset.placeholder = placeholder;
     return d;
