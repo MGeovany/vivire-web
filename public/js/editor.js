@@ -445,6 +445,60 @@
   let audioCtx = null;
   let soundOn  = localStorage.getItem('vivire_sound') !== 'off';   // default ON
 
+  // Cached white-noise buffer (reused by every keystroke).
+  let noiseBuf = null;
+  function whiteNoise() {
+    if (noiseBuf) return noiseBuf;
+    const len = Math.ceil(audioCtx.sampleRate * 0.2);
+    noiseBuf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    return noiseBuf;
+  }
+
+  // One filtered noise burst (used to layer the typewriter clack).
+  function noiseBurst(t, freq, q, type, peak, dur) {
+    const src = audioCtx.createBufferSource();
+    src.buffer = whiteNoise();
+    const f = audioCtx.createBiquadFilter();
+    f.type = type;
+    f.frequency.value = freq;
+    if (q) f.Q.value = q;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + 0.001);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f).connect(g).connect(audioCtx.destination);
+    src.start(t);
+    src.stop(t + dur + 0.02);
+  }
+
+  function tone(t, type, freq, peak, dur) {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + 0.003);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t);
+    o.stop(t + dur + 0.02);
+  }
+
+  // The mechanical clack of a typebar hitting the platen.
+  function typeClack(t) {
+    noiseBurst(t, 2600 + Math.random() * 500, 6, 'bandpass', 0.45, 0.028); // metallic snap
+    noiseBurst(t, 210, 1.2, 'bandpass', 0.30, 0.06);                       // wooden body thunk
+    tone(t, 'square', 1300 + Math.random() * 200, 0.10, 0.018);            // sharp pitched tick
+  }
+
+  // The carriage-return bell on Enter.
+  function bellDing(t) {
+    tone(t, 'sine', 1100, 0.17, 0.42);
+    tone(t, 'sine', 2200, 0.05, 0.42);
+  }
+
   function playClick(e) {
     if (!soundOn) return;
     const k = e.key;
@@ -454,37 +508,8 @@
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const t = audioCtx.currentTime;
-
-      // Tonal body — a short mechanical "thock"
-      const osc  = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      const base = (k === 'Enter' || k === ' ') ? 150 : 320;
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(base + Math.random() * 60, t);
-      osc.frequency.exponentialRampToValueAtTime(base * 0.6, t + 0.05);
-      gain.gain.setValueAtTime(0.0001, t);
-      gain.gain.exponentialRampToValueAtTime(0.26, t + 0.003);   // clearly audible
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
-      osc.connect(gain).connect(audioCtx.destination);
-      osc.start(t);
-      osc.stop(t + 0.1);
-
-      // Transient "click" on top — a tiny filtered noise burst for the key snap
-      const dur = 0.03;
-      const buf = audioCtx.createBuffer(1, Math.ceil(audioCtx.sampleRate * dur), audioCtx.sampleRate);
-      const data = buf.getChannelData(0);
-      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
-      const noise = audioCtx.createBufferSource();
-      noise.buffer = buf;
-      const hp = audioCtx.createBiquadFilter();
-      hp.type = 'highpass';
-      hp.frequency.value = 1800;
-      const ng = audioCtx.createGain();
-      ng.gain.setValueAtTime(0.12, t);
-      ng.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      noise.connect(hp).connect(ng).connect(audioCtx.destination);
-      noise.start(t);
-      noise.stop(t + dur);
+      typeClack(t);
+      if (k === 'Enter') bellDing(t + 0.015);   // carriage-return bell
     } catch (_) { /* audio unavailable — ignore */ }
   }
 

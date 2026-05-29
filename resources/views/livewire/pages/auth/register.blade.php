@@ -2,9 +2,11 @@
 
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
@@ -17,26 +19,61 @@ new #[Layout('layouts.guest')] class extends Component
 
     public function register(): void
     {
-        $validated = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
-        ]);
+        try {
+            $validated = $this->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+                'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+            ], [
+                'email.unique' => __('validation.unique'),
+            ]);
+        } catch (ValidationException $e) {
+            if ($e->validator->errors()->has('email')) {
+                $this->dispatch(
+                    'vivire-toast',
+                    message: $e->validator->errors()->first('email'),
+                    type: 'error',
+                );
+            }
+
+            throw $e;
+        }
 
         $validated['password'] = Hash::make($validated['password']);
 
-        event(new Registered($user = User::create($validated)));
+        try {
+            event(new Registered($user = User::create($validated)));
+        } catch (QueryException $e) {
+            if ($this->isDuplicateEmail($e)) {
+                $message = __('validation.unique');
+
+                $this->dispatch('vivire-toast', message: $message, type: 'error');
+                $this->addError('email', $message);
+
+                return;
+            }
+
+            throw $e;
+        }
 
         Auth::login($user);
 
         $this->redirect(route('journal', absolute: false), navigate: true);
+    }
+
+    private function isDuplicateEmail(QueryException $e): bool
+    {
+        $message = strtolower($e->getMessage());
+
+        return str_contains($message, 'unique constraint failed')
+            && str_contains($message, 'users.email');
     }
 }; ?>
 
 <div>
     <x-ui.auth-tabs active="register" class="animate-fade-in" style="animation-delay: 100ms" />
 
-    <form wire:submit="register" class="flex flex-col gap-1 mt-2 animate-fade-up" style="animation-delay: 140ms">
+    <x-ui.auth-form action="register" class="flex flex-col gap-1 mt-2 animate-fade-up" style="animation-delay: 140ms">
         <div>
             <x-ui.input wire:model="name" type="text" name="name" required autofocus autocomplete="name" placeholder="Tu nombre" />
             <x-ui.error :messages="$errors->get('name')" />
@@ -58,5 +95,5 @@ new #[Layout('layouts.guest')] class extends Component
         </div>
 
         <x-ui.button class="mt-2">Crear cuenta</x-ui.button>
-    </form>
+    </x-ui.auth-form>
 </div>

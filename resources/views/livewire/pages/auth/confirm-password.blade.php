@@ -35,12 +35,12 @@ new #[Layout('layouts.guest')] class extends Component
         Esta es un área segura. Confirma tu contraseña para continuar.
     </p>
 
-    <form wire:submit="confirmPassword" class="flex flex-col gap-3.5">
+    <x-ui.auth-form action="confirmPassword" class="flex flex-col gap-3.5">
         <div>
             <x-ui.input wire:model="password" id="password" type="password" name="password" required autocomplete="current-password" placeholder="Contraseña" />
             <x-ui.error :messages="$errors->get('password')" />
         </div>
 
         <x-ui.button>Confirmar</x-ui.button>
-    </form>
+    </x-ui.auth-form>
 </div>

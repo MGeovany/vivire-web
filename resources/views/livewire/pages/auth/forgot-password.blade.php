@@ -39,7 +39,7 @@ new #[Layout('layouts.guest')] class extends Component
         <p class="text-[12.5px] text-success mb-4 px-3 py-2 bg-success/10 rounded-lg">{{ session('status') }}</p>
     @endif
 
-    <form wire:submit="sendPasswordResetLink" class="flex flex-col gap-3.5">
+    <x-ui.auth-form action="sendPasswordResetLink" class="flex flex-col gap-3.5">
         <div>
             <x-ui.input wire:model="email" id="email" type="email" name="email" required autofocus placeholder="Email" />
             <x-ui.error :messages="$errors->get('email')" />
@@ -50,5 +50,5 @@ new #[Layout('layouts.guest')] class extends Component
         <a href="{{ route('login') }}" wire:navigate class="text-[12.5px] text-muted hover:text-subtle transition-colors text-center pt-1">
             Volver a entrar
         </a>
-    </form>
+    </x-ui.auth-form>
 </div>

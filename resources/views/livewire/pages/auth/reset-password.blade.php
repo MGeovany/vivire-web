@@ -61,7 +61,7 @@ new #[Layout('layouts.guest')] class extends Component
         Elige una contraseña nueva para tu cuenta.
     </p>
 
-    <form wire:submit="resetPassword" class="flex flex-col gap-3.5">
+    <x-ui.auth-form action="resetPassword" class="flex flex-col gap-3.5">
         <div>
             <x-ui.input wire:model="email" id="email" type="email" name="email" required autofocus autocomplete="username" placeholder="Email" />
             <x-ui.error :messages="$errors->get('email')" />
@@ -78,5 +78,5 @@ new #[Layout('layouts.guest')] class extends Component
         </div>
 
         <x-ui.button>Restablecer contraseña</x-ui.button>
-    </form>
+    </x-ui.auth-form>
 </div>

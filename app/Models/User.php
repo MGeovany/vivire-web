@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -21,6 +22,14 @@ class User extends Authenticatable
     public function entries(): HasMany
     {
         return $this->hasMany(Entry::class);
+    }
+
+    /** @return Attribute<string, string> */
+    protected function email(): Attribute
+    {
+        return Attribute::make(
+            set: fn (string $value) => strtolower(trim($value)),
+        );
     }
 
     /**

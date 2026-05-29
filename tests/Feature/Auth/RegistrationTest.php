@@ -33,4 +33,28 @@ class RegistrationTest extends TestCase
 
         $this->assertAuthenticated();
     }
+
+    public function test_registration_rejects_duplicate_email(): void
+    {
+        Volt::test('pages.auth.register')
+            ->set('name', 'First User')
+            ->set('email', 'dupe@example.com')
+            ->set('password', 'password')
+            ->set('password_confirmation', 'password')
+            ->call('register')
+            ->assertRedirect(route('journal', absolute: false));
+
+        auth()->logout();
+
+        Volt::test('pages.auth.register')
+            ->set('name', 'Second User')
+            ->set('email', 'dupe@example.com')
+            ->set('password', 'password')
+            ->set('password_confirmation', 'password')
+            ->call('register')
+            ->assertHasErrors(['email' => 'unique']);
+
+        $this->assertGuest();
+        $this->assertDatabaseCount('users', 1);
+    }
 }

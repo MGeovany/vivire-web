@@ -43,7 +43,7 @@ new #[Layout('layouts.guest')] class extends Component
         <p class="text-[12.5px] text-success mb-4 px-3 py-2 bg-success/10 rounded-lg animate-fade-in">{{ session('status') }}</p>
     @endif
 
-    <form wire:submit="login" class="flex flex-col gap-1 mt-2 animate-fade-up" style="animation-delay: 140ms">
+    <x-ui.auth-form action="login" class="flex flex-col gap-1 mt-2 animate-fade-up" style="animation-delay: 140ms">
         <div>
             <x-ui.input wire:model="form.email" type="email" name="email" required autofocus autocomplete="username" placeholder="Email" />
             <x-ui.error :messages="$errors->get('form.email')" />
@@ -63,5 +63,5 @@ new #[Layout('layouts.guest')] class extends Component
                 ¿Olvidaste tu contraseña?
             </a>
         @endif
-    </form>
+    </x-ui.auth-form>
 </div>
