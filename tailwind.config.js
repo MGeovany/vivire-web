@@ -12,7 +12,9 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['"DM Sans"', ...defaultTheme.fontFamily.sans],
+                serif: ['"DM Serif Display"', ...defaultTheme.fontFamily.serif],
+                lora: ['Lora', ...defaultTheme.fontFamily.serif],
             },
         },
     },

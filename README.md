@@ -8,7 +8,7 @@ Diario minimalista. Migrado a **Laravel 10 + Livewire** usando **Postgres (Supab
 1. `cp .env.example .env` y configura `APP_KEY` (`php artisan key:generate`) y `DB_*` (Postgres de Supabase)
 1. `composer dev`
 
-Abre `http://localhost:8080`.
+Abre `http://localhost:8081`.
 
 ## Deploy (Vercel)
 
