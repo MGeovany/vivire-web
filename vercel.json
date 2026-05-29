@@ -1,28 +1,14 @@
 {
   "functions": {
-    "public/index.php": {
-      "runtime": "vercel-php@0.7.2"
-    }
-  },
-  "env": {
-    "APP_ENV": "production",
-    "APP_DEBUG": "false",
-
-    "APP_CONFIG_CACHE": "/tmp/config.php",
-    "APP_EVENTS_CACHE": "/tmp/events.php",
-    "APP_PACKAGES_CACHE": "/tmp/packages.php",
-    "APP_ROUTES_CACHE": "/tmp/routes.php",
-    "APP_SERVICES_CACHE": "/tmp/services.php",
-
-    "CACHE_DRIVER": "array",
-    "LOG_CHANNEL": "stderr",
-    "SESSION_DRIVER": "cookie",
-    "VIEW_COMPILED_PATH": "/tmp/views"
+    "api/index.php": { "runtime": "vercel-php@0.7.2" }
   },
   "rewrites": [
-    { "source": "/css/(.*)",  "destination": "/public/css/$1"  },
-    { "source": "/js/(.*)",   "destination": "/public/js/$1"   },
-    { "source": "/dict/(.*)", "destination": "/public/dict/$1" },
-    { "source": "/(.*)",     "destination": "/public/index.php" }
+    { "source": "/css/(.*)",     "destination": "/public/css/$1"     },
+    { "source": "/js/(.*)",      "destination": "/public/js/$1"      },
+    { "source": "/dict/(.*)",    "destination": "/public/dict/$1"    },
+    { "source": "/storage/(.*)", "destination": "/public/storage/$1" },
+    { "source": "/favicon.ico",  "destination": "/public/favicon.ico" },
+    { "source": "/robots.txt",   "destination": "/public/robots.txt" },
+    { "source": "/(.*)",         "destination": "/api/index.php"     }
   ]
 }

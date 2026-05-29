@@ -1,34 +1,17 @@
 <?php
 
+use App\Http\Controllers\EntryController;
+use App\Http\Controllers\UploadController;
+use App\Livewire\Journal;
 use Illuminate\Support\Facades\Route;
 
-use App\Livewire\JournalPage;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
-Route::get('/', function () {
-    return auth()->check() ? redirect()->route('journal') : redirect()->route('login');
-});
-
-Route::get('/journal', JournalPage::class)
-    ->middleware(['auth'])
+Route::get('/', Journal::class)
+    ->middleware('auth')
     ->name('journal');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
-Route::view('profile', 'profile')
-    ->middleware(['auth'])
-    ->name('profile');
+Route::middleware('auth')->group(function () {
+    Route::post('/entries', [EntryController::class, 'store'])->name('entries.store');
+    Route::post('/uploads', [UploadController::class, 'store'])->name('uploads.store');
+});
 
 require __DIR__.'/auth.php';

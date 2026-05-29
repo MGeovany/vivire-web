@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\User;
-use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -33,57 +32,48 @@ new #[Layout('layouts.guest')] class extends Component
 
         Auth::login($user);
 
-        $this->redirect(RouteServiceProvider::HOME, navigate: true);
+        $this->redirect(route('journal', absolute: false), navigate: true);
     }
 }; ?>
 
 <div>
-    <form wire:submit="register">
-        <!-- Name -->
+    {{-- Tabs --}}
+    <div class="flex mb-7 border-b border-border">
+        <a href="{{ route('login') }}" wire:navigate class="text-[13.5px] text-subtle pb-2 mr-[22px] border-b-[1.5px] border-transparent -mb-px transition-colors hover:text-fg">Entrar</a>
+        <a href="{{ route('register') }}" wire:navigate class="text-[13.5px] text-fg pb-2 mr-[22px] border-b-[1.5px] border-fg -mb-px">Crear cuenta</a>
+    </div>
+
+    <form wire:submit="register" class="flex flex-col gap-3">
         <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input wire:model="name" id="name" class="block mt-1 w-full" type="text" name="name" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+            <input wire:model="name" type="text" name="name" required autofocus autocomplete="name"
+                   placeholder="Tu nombre"
+                   class="w-full px-[14px] py-[11px] text-sm bg-white border border-border rounded-lg outline-none transition focus:border-fg focus:ring-[3px] focus:ring-fg/[0.06] placeholder:text-muted">
+            @error('name') <p class="text-[12.5px] text-error mt-1">{{ $message }}</p> @enderror
         </div>
 
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div>
+            <input wire:model="email" type="email" name="email" required autocomplete="username"
+                   placeholder="Email"
+                   class="w-full px-[14px] py-[11px] text-sm bg-white border border-border rounded-lg outline-none transition focus:border-fg focus:ring-[3px] focus:ring-fg/[0.06] placeholder:text-muted">
+            @error('email') <p class="text-[12.5px] text-error mt-1">{{ $message }}</p> @enderror
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input wire:model="password" id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        <div>
+            <input wire:model="password" type="password" name="password" required autocomplete="new-password"
+                   placeholder="Contraseña"
+                   class="w-full px-[14px] py-[11px] text-sm bg-white border border-border rounded-lg outline-none transition focus:border-fg focus:ring-[3px] focus:ring-fg/[0.06] placeholder:text-muted">
+            @error('password') <p class="text-[12.5px] text-error mt-1">{{ $message }}</p> @enderror
         </div>
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input wire:model="password_confirmation" id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+        <div>
+            <input wire:model="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password"
+                   placeholder="Confirma tu contraseña"
+                   class="w-full px-[14px] py-[11px] text-sm bg-white border border-border rounded-lg outline-none transition focus:border-fg focus:ring-[3px] focus:ring-fg/[0.06] placeholder:text-muted">
+            @error('password_confirmation') <p class="text-[12.5px] text-error mt-1">{{ $message }}</p> @enderror
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}" wire:navigate>
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
-        </div>
+        <button type="submit" class="mt-1 px-[14px] py-[11px] text-sm font-medium text-bg bg-fg rounded-lg transition hover:opacity-[0.82] tracking-[0.01em]">
+            Crear cuenta
+        </button>
     </form>
 </div>

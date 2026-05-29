@@ -2,9 +2,10 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Livewire\Journal;
 use App\Models\User;
-use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Livewire\Volt\Volt;
 use Tests\TestCase;
 
@@ -33,7 +34,7 @@ class AuthenticationTest extends TestCase
 
         $component
             ->assertHasNoErrors()
-            ->assertRedirect(RouteServiceProvider::HOME);
+            ->assertRedirect(route('journal', absolute: false));
 
         $this->assertAuthenticated();
     }
@@ -55,32 +56,24 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_navigation_menu_can_be_rendered(): void
+    public function test_journal_is_rendered_for_authenticated_users(): void
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user);
-
-        $response = $this->get('/dashboard');
-
-        $response
+        $this->actingAs($user)
+            ->get('/')
             ->assertOk()
-            ->assertSeeVolt('layout.navigation');
+            ->assertSee('Reflexiones de hoy');
     }
 
     public function test_users_can_logout(): void
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user);
-
-        $component = Volt::test('layout.navigation');
-
-        $component->call('logout');
-
-        $component
-            ->assertHasNoErrors()
-            ->assertRedirect('/');
+        Livewire::actingAs($user)
+            ->test(Journal::class)
+            ->call('logout')
+            ->assertRedirect('/login');
 
         $this->assertGuest();
     }

@@ -9,6 +9,10 @@
 
   function keyOf(editor) { return editor.dataset.section + '|' + editor.dataset.date; }
 
+  function csrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content || '';
+  }
+
   // ── Optimized auto-save (only fires when content actually changed) ──────────
   function scheduleAutoSave(editor) {
     const key  = keyOf(editor);
@@ -30,11 +34,16 @@
       entry_date: editor.dataset.date,
       blocks,
     };
-    console.log('[vivire] POST /api/save', payload);
+    console.log('[vivire] POST /entries', payload);
     try {
-      const res = await fetch('/api/save', {
+      const res = await fetch('/entries', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': csrfToken(),
+        },
+        credentials: 'same-origin',
         body: JSON.stringify(payload),
       });
       console.log('[vivire] save response', res.status);
@@ -171,9 +180,14 @@
     form.append('file', file);
     form.append('type', type);
 
-    console.log('[vivire] POST /api/upload', { type, name: file.name, size: file.size });
+    console.log('[vivire] POST /uploads', { type, name: file.name, size: file.size });
     try {
-      const res = await fetch('/api/upload', { method: 'POST', body: form });
+      const res = await fetch('/uploads', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken() },
+        credentials: 'same-origin',
+        body: form,
+      });
       console.log('[vivire] upload response', res.status);
       if (res.ok) {
         const { url, name, size } = await res.json();

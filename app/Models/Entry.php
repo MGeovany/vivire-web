@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Entry extends Model
 {
-    use HasFactory;
+    /** Valid section identifiers. */
+    public const SECTIONS = ['feelings', 'thoughts', 'reflections', 'year1', 'year2', 'year3'];
 
     protected $fillable = [
         'user_id',
@@ -16,8 +17,13 @@ class Entry extends Model
         'blocks',
     ];
 
+    // entry_date stays a plain 'Y-m-d' string so date-keyed upserts match exactly.
     protected $casts = [
-        'entry_date' => 'date',
         'blocks' => 'array',
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

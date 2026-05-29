@@ -1,31 +1,28 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{{ config('app.name', 'vivire') }}</title>
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📓</text></svg>">
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=Lora:ital,wght@0,400;0,500;1,400;1,500&display=swap">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=Lora:ital,wght@0,400;0,500;1,400;1,500&display=swap">
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased bg-[var(--color-bg)] text-[var(--color-fg)]">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
-            <div>
-                <a href="/" wire:navigate>
-                    <x-application-logo class="w-16 h-16 fill-current text-[var(--color-subtle)]" />
-                </a>
-            </div>
+  <link rel="stylesheet" href="{{ asset('css/tailwind.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-5 bg-white/60 backdrop-blur border border-[var(--color-border)] overflow-hidden rounded-2xl">
-                {{ $slot }}
-            </div>
-        </div>
-    </body>
+  @livewireStyles
+</head>
+<body class="font-sans bg-bg text-fg antialiased min-h-screen flex items-center justify-center p-6">
+  <div class="w-full max-w-[380px]">
+    <a href="/" wire:navigate class="font-serif text-[28px] text-fg tracking-[-0.3px] block mb-10">vivire</a>
+    {{ $slot }}
+  </div>
+
+  @livewireScripts
+</body>
 </html>
