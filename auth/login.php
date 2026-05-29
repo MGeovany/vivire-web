@@ -1,10 +1,5 @@
 <?php
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/../lib/supabase.php';
-require_once __DIR__ . '/../templates/layout.php';
 
-// Already logged in
 if (getAuthUser()) {
     header('Location: /');
     exit;

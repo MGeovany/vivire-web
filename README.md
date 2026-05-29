@@ -4,14 +4,14 @@ A minimalist daily journal web app. Write your end-of-day reflections — how yo
 
 ## Stack
 
-| Layer    | Technology                              |
-|----------|-----------------------------------------|
-| Frontend | Static HTML + Vanilla JS + CSS          |
-| Auth     | Supabase Auth (JS client)               |
-| Database | Supabase PostgreSQL (with RLS)          |
-| Storage  | Supabase Storage (`journal-media`)      |
-| API      | PHP serverless functions (`api/*.php`)  |
-| Deploy   | Vercel (`vercel-php@0.7.2` runtime)     |
+| Layer    | Technology                         |
+|----------|------------------------------------|
+| Backend  | PHP 8.1+ (Composer)                |
+| Frontend | Server-rendered HTML + `editor.js` |
+| Auth     | Supabase Auth (server-side cookies)|
+| Database | Supabase PostgreSQL (with RLS)     |
+| Storage  | Supabase Storage (`journal-media`) |
+| Deploy   | Vercel (`vercel-php` runtime)      |
 
 ---
 
@@ -30,7 +30,13 @@ In the Supabase dashboard → **SQL Editor**, run the contents of `supabase/sche
 In Supabase → **Storage**, create a new bucket named `journal-media`.
 Set it to **Public** so uploaded media can be served directly.
 
-### 4. Configure environment variables
+### 4. Install PHP dependencies
+
+```bash
+composer install
+```
+
+### 5. Configure environment variables
 
 ```bash
 cp .env.example .env
@@ -45,36 +51,36 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...   # Settings → API → service_role (keep sec
 SUPABASE_JWT_SECRET=your-secret    # Settings → API → JWT Secret
 ```
 
-### 5. Inject Supabase credentials into index.html
+---
 
-For local development, open `index.html` and replace the placeholder strings:
-
-```html
-window.SUPABASE_URL      = 'REPLACE_WITH_SUPABASE_URL';
-window.SUPABASE_ANON_KEY = 'REPLACE_WITH_SUPABASE_ANON_KEY';
-```
-
-with your actual `SUPABASE_URL` and `SUPABASE_ANON_KEY` values (the anon key is safe to expose in the browser).
-
-### 6. Deploy to Vercel
+## Local development
 
 ```bash
-npm i -g vercel   # if not installed
+composer install
+cp .env.example .env   # fill in Supabase credentials
+composer dev
+```
+
+Opens at **http://localhost:8080**.
+
+The built-in PHP server serves static assets from `public/` and routes all requests through `public/index.php` (FastRoute).
+
+---
+
+## Deploy to Vercel
+
+```bash
 vercel deploy
 ```
 
-### 7. Add environment variables in Vercel
+Add environment variables in the Vercel dashboard → **Settings → Environment Variables**:
 
-In the Vercel dashboard → your project → **Settings → Environment Variables**, add:
-
-| Key                       | Value                            |
-|---------------------------|----------------------------------|
-| `SUPABASE_URL`            | `https://your-project.supabase.co` |
-| `SUPABASE_ANON_KEY`       | your anon key                    |
-| `SUPABASE_SERVICE_ROLE_KEY` | your service role key          |
-| `SUPABASE_JWT_SECRET`     | your JWT secret                  |
-
-The PHP functions read these at runtime via `getenv()`.
+| Key                         | Value                              |
+|-----------------------------|------------------------------------|
+| `SUPABASE_URL`              | `https://your-project.supabase.co` |
+| `SUPABASE_ANON_KEY`         | your anon key                      |
+| `SUPABASE_SERVICE_ROLE_KEY` | your service role key              |
+| `SUPABASE_JWT_SECRET`       | your JWT secret                    |
 
 ---
 
@@ -82,44 +88,34 @@ The PHP functions read these at runtime via `getenv()`.
 
 ```
 vivire-web/
-├── index.html          # Single-page app shell + auth UI
-├── vercel.json         # Vercel config (PHP runtime, rewrites)
-├── .env.example        # Environment variable template
-├── css/
-│   └── app.css         # Full Notion-inspired stylesheet
-├── js/
-│   └── app.js          # Vanilla JS app (~500 lines)
-├── api/
-│   ├── _helper.php     # JWT verification, Supabase REST helpers, CORS
-│   └── entries.php     # GET + POST (upsert) for journal entries
-└── supabase/
-    └── schema.sql      # PostgreSQL schema with RLS policies
+├── composer.json       # PHP dependencies + dev script
+├── bootstrap.php       # Autoload + .env loader
+├── config.php          # App constants from getenv()
+├── public/
+│   ├── index.php       # Front controller (routes)
+│   ├── router.php      # Built-in server router
+│   ├── css/app.css
+│   └── js/editor.js
+├── handlers/home.php   # / → journal or redirect
+├── auth/               # login, register, logout
+├── api/                # save, upload (JSON)
+├── journal/            # SSR journal page
+├── lib/                # Supabase, auth, entries, blocks
+├── templates/          # HTML layout
+└── supabase/schema.sql
 ```
-
----
-
-## Local development
-
-Since `api/*.php` requires the Vercel PHP runtime, the easiest local option is:
-
-```bash
-vercel dev
-```
-
-This runs the Vercel dev server locally, emulating the PHP serverless functions.
-Make sure your `.env` file is present — `vercel dev` loads it automatically.
 
 ---
 
 ## How it works
 
-1. User signs up (name + email + password) via Supabase Auth.
-2. A Postgres trigger auto-creates a `profiles` row.
+1. User signs up (name + email + password) via server-side forms → Supabase Auth.
+2. Access + refresh tokens stored in HttpOnly cookies.
 3. On every visit, the journal loads today's 3 sections (feelings / thoughts / reflections).
 4. Below the main journal, the same calendar date is shown for +1/+2/+3 years:
    - Future → locked, greyed out.
    - Past → readable, not editable.
    - Today (same month+day) → fully editable.
-5. Each section auto-saves after 1.5 s of inactivity.
-6. Media (images, audio, video, documents) uploads to Supabase Storage and appears inline.
+5. Each section auto-saves after 1.5 s of inactivity (`editor.js` → `/api/save`).
+6. Media uploads to Supabase Storage via `/api/upload`.
 7. All entries are stored as a JSONB `blocks` array: `[{id, type, content, metadata}]`.

@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/supabase.php';
 
 function getEntriesByDate(string $userId, string $dateISO): array {
     $result = supabaseRequest('GET', '/entries', [
